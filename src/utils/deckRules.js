@@ -41,7 +41,7 @@ export const getCardNameCount = (deck, cardName, referenceCard = null) => {
 
   return Object.values(deck)
     .filter(({ card }) => {
-      if (referenceCard && card.supertype === "Pokémon") {
+      if (referenceCard) {
         return getComparisonKey(card) === referenceKey;
       }
       return normalizeName(card.name) === referenceKey;

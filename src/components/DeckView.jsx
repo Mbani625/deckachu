@@ -1,7 +1,10 @@
-import React from "react";
+import React, { useState } from "react";
 import DeckSection from "./DeckSection";
+import CardExpandInfo from "./CardExpandInfo";
 
 const DeckView = ({ deck, onAdd, onRemove, setSearchTerm }) => {
+  const [expandedCard, setExpandedCard] = useState(null);
+
   const deckArray = Object.values(deck);
   const totalCount = deckArray.reduce((sum, { count }) => sum + count, 0);
 
@@ -24,8 +27,11 @@ const DeckView = ({ deck, onAdd, onRemove, setSearchTerm }) => {
 
   const { pokemon, trainer, energy } = categorizeDeck();
 
+  const handleExpand = (card) => setExpandedCard(card);
+  const handleClose = () => setExpandedCard(null);
+
   return (
-    <div>
+    <div className="relative">
       <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-6 gap-3">
         <h2 className="text-xl font-bold">Your Deck</h2>
         <p className="text-sm text-gray-400">
@@ -40,14 +46,15 @@ const DeckView = ({ deck, onAdd, onRemove, setSearchTerm }) => {
         onAdd={onAdd}
         onRemove={onRemove}
         setSearchTerm={setSearchTerm}
+        onExpand={handleExpand}
       />
-
       <DeckSection
         title="Trainer"
         cards={trainer}
         onAdd={onAdd}
         onRemove={onRemove}
         setSearchTerm={setSearchTerm}
+        onExpand={handleExpand}
       />
       <DeckSection
         title="Energy"
@@ -55,7 +62,16 @@ const DeckView = ({ deck, onAdd, onRemove, setSearchTerm }) => {
         onAdd={onAdd}
         onRemove={onRemove}
         setSearchTerm={setSearchTerm}
+        onExpand={handleExpand}
       />
+
+      {expandedCard && (
+        <CardExpandInfo
+          card={expandedCard}
+          onClose={handleClose}
+          setSearchTerm={setSearchTerm}
+        />
+      )}
     </div>
   );
 };

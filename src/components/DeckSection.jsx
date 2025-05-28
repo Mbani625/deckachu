@@ -1,7 +1,7 @@
 import React, { useState } from "react";
 import DeckCard from "./DeckCard";
 
-const DeckSection = ({ title, cards, onAdd, onRemove }) => {
+const DeckSection = ({ title, cards, onAdd, onRemove, onExpand }) => {
   const [open, setOpen] = useState(true);
 
   // Calculate total count of cards in this section
@@ -35,6 +35,7 @@ const DeckSection = ({ title, cards, onAdd, onRemove }) => {
                 count={count}
                 onAdd={onAdd}
                 onRemove={onRemove}
+                onExpand={onExpand}
               />
             ))}
           </div>

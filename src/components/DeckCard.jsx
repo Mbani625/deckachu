@@ -1,27 +1,25 @@
 import React, { useState } from "react";
-import CardExpandInfo from "./CardExpandInfo";
 
-const DeckCard = ({ card, count, onAdd, onRemove, setSearchTerm }) => {
-  const [expanded, setExpanded] = useState(false);
-  const [pulseClass, setPulseClass] = useState("");
+const DeckCard = ({ card, count, onAdd, onRemove, onExpand }) => {
+  const [pulse, setPulse] = useState("");
 
   const handleAdd = () => {
     onAdd(card);
-    setPulseClass("pulse-green");
-    setTimeout(() => setPulseClass(""), 400);
+    setPulse("pulse-green");
+    setTimeout(() => setPulse(""), 400);
   };
 
   const handleRemove = () => {
     onRemove(card.id);
-    setPulseClass("pulse-red");
-    setTimeout(() => setPulseClass(""), 400);
+    setPulse("pulse-red");
+    setTimeout(() => setPulse(""), 400);
   };
 
   return (
     <div
-      className={`relative w-[165px] h-[330px] bg-gray-800 p-3 rounded shadow text-center flex flex-col items-center justify-between transition-all duration-300 ${pulseClass} opacity-0 animate-fade-in`}
+      className={`relative m-auto w-[185px] h-[380px] bg-gray-800 p-3 rounded shadow text-center flex flex-col items-center justify-between transition-all duration-300 opacity-0 animate-fade-in ${pulse}`}
     >
-      <div className="cursor-pointer" onClick={() => setExpanded(true)}>
+      <div className="cursor-pointer" onClick={() => onExpand(card)}>
         <img
           src={card.images.small}
           alt={card.name}
@@ -49,14 +47,6 @@ const DeckCard = ({ card, count, onAdd, onRemove, setSearchTerm }) => {
           +1
         </button>
       </div>
-
-      {expanded && (
-        <CardExpandInfo
-          card={card}
-          onClose={() => setExpanded(false)}
-          setSearchTerm={setSearchTerm}
-        />
-      )}
     </div>
   );
 };
