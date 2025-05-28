@@ -2,6 +2,33 @@
 @tailwind components;
 @tailwind utilities;
 
+@layer utilities {
+  .pulse-green {
+    box-shadow: 0 0 8px 6px rgba(34, 197, 94, 0.6);
+    transition: box-shadow 0.4s ease-in-out;
+  }
+
+  .pulse-red {
+    box-shadow: 0 0 8px 6px rgba(239, 68, 68, 0.6);
+    transition: box-shadow 0.4s ease-in-out;
+  }
+
+  .animate-fade-in {
+    animation: fadeInUp 0.4s ease-out forwards;
+  }
+
+  @keyframes fadeInUp {
+    0% {
+      opacity: 0;
+      transform: translateY(10px);
+    }
+    100% {
+      opacity: 1;
+      transform: translateY(0);
+    }
+  }
+}
+
 body {
   margin: 0;
   font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", "Roboto", "Oxygen",
