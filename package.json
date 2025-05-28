@@ -1,6 +1,7 @@
 {
   "name": "deckachu",
   "version": "0.1.0",
+  "homepage": "https://mbani625.github.io/deckachu",
   "private": true,
   "dependencies": {
     "@testing-library/dom": "^10.4.0",
