@@ -63,14 +63,14 @@ function App() {
 
     window.addEventListener("scroll", handleScroll);
     return () => window.removeEventListener("scroll", handleScroll);
-  }, []);
+  });
 
   const handleSearch = () => {
     let queryParts = [];
 
     if (format === "standard") {
       queryParts.push(
-        `(regulationMark:"F" OR regulationMark:"G" OR regulationMark:"H" OR regulationMark:"I")`
+        `( regulationMark:"G" OR regulationMark:"H" OR regulationMark:"I" OR regulationMark:"J")`
       );
     } else if (format && format !== "all") {
       queryParts.push(`legalities.${format}:legal`);
@@ -274,6 +274,8 @@ function App() {
           <CardGrid
             cards={sortedResults}
             onAdd={handleAddToDeck}
+            setSearchTerm={setSearchTerm}
+            onSearchSubmit={handleSearch}
             loadMore={loadMore}
             hasMore={page < 10}
           />
