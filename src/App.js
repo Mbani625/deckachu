@@ -155,7 +155,7 @@ function App() {
                 />
                 <button
                   onClick={handleSearch}
-                  className="bg-green-600 hover:bg-green-700 text-white font-semibold px-4 py-2 rounded"
+                  className="bg-green-600 hover:bg-green-700 text-white font-semibold px-3 py-1.5 sm:px-4 sm:py-2 text-sm sm:text-base rounded"
                 >
                   Search
                 </button>
