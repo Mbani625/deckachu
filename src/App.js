@@ -17,6 +17,7 @@ function App() {
   const [pokemonTypeFilter, setPokemonTypeFilter] = useState("");
   const [sortOption, setSortOption] = useState("");
   const { results, searchCards, loadMore, page, allResults } = useCardSearch();
+  const [showBackToTop, setShowBackToTop] = useState(false);
 
   const [showHeader, setShowHeader] = useState(true);
   const lastScrollTop = useRef(0);
@@ -24,11 +25,10 @@ function App() {
   useEffect(() => {
     const handleScroll = () => {
       const scrollTop = window.scrollY || document.documentElement.scrollTop;
-      if (scrollTop < lastScrollTop.current) {
-        setShowHeader(true); // scrolling up
-      } else {
-        setShowHeader(false); // scrolling down
-      }
+
+      setShowHeader(scrollTop < lastScrollTop.current); // scrolling up = show header
+      setShowBackToTop(scrollTop > 30); // show back to top if scroll exceeds 300px
+
       lastScrollTop.current = scrollTop <= 0 ? 0 : scrollTop;
     };
 
@@ -240,7 +240,7 @@ function App() {
           </div>
         </div>
 
-        <div className="flex-grow overflow-y-auto mt-[200px] p-4 pt-0">
+        <div className="flex-grow overflow-y-auto mt-[100px] p-4 pt-0">
           <CardGrid
             cards={sortedResults}
             handleAddToDeck={handleAddToDeck}
@@ -270,6 +270,16 @@ function App() {
           setSearchTerm={setSearchTerm}
         />
       </div>
+
+      {showBackToTop && (
+        <button
+          onClick={() => window.scrollTo({ top: 0, behavior: "smooth" })}
+          className="fixed bottom-5 right-5 z-30 bg-gray-700 hover:bg-gray-600 text-white p-2 rounded-full shadow-md text-lg opacity-70 hover:opacity-100 transition"
+          title="Back to Top"
+        >
+          ↑
+        </button>
+      )}
     </div>
   );
 }
