@@ -10,7 +10,10 @@ import FilterDropdown from "./components/FilterDropdown";
 
 function App() {
   const [searchTerm, setSearchTerm] = useState("");
-  const [deck, setDeck] = useState({});
+  const [deck, setDeck] = useState(() => {
+    const saved = localStorage.getItem("deckachu_deck");
+    return saved ? JSON.parse(saved) : [];
+  });
   const [format, setFormat] = useState("standard");
   const [typeFilter, setTypeFilter] = useState("");
   const [subtypeFilter, setSubtypeFilter] = useState("");
@@ -18,7 +21,6 @@ function App() {
   const [sortOption, setSortOption] = useState("");
   const { results, searchCards, loadMore, page, allResults } = useCardSearch();
   const [showBackToTop, setShowBackToTop] = useState(false);
-
   const [showHeader, setShowHeader] = useState(true);
   const lastScrollTop = useRef(0);
   const scrollDirection = useRef("down");
@@ -125,6 +127,10 @@ function App() {
     }
     return sorted.slice(0, page * 20);
   }, [allResults, sortOption, page]);
+
+  useEffect(() => {
+    localStorage.setItem("deckachu_deck", JSON.stringify(deck));
+  }, [deck]);
 
   const handleAddToDeck = (card) => {
     if (!canAddCardToDeck(deck, card)) return;
@@ -270,7 +276,7 @@ function App() {
           </div>
         </div>
 
-        <div className="flex-grow overflow-y-auto mt-[100px] p-4 pt-0">
+        <div className="flex-grow overflow-y-auto md:mt-[0px] mt-[100px] p-4 pt-0">
           <CardGrid
             cards={sortedResults}
             onAdd={handleAddToDeck}
@@ -301,6 +307,19 @@ function App() {
           onRemove={handleRemoveFromDeck}
           setSearchTerm={setSearchTerm}
         />
+        <button
+          className="bg-red-600 text-white px-3 py-1 rounded hover:bg-red-700"
+          onClick={() => {
+            if (
+              window.confirm("Are you sure you want to clear your entire deck?")
+            ) {
+              setDeck({});
+              localStorage.removeItem("deckachu_mainDeck");
+            }
+          }}
+        >
+          Clear Deck
+        </button>
       </div>
 
       {showBackToTop && (
