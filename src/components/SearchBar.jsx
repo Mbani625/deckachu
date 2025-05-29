@@ -9,7 +9,7 @@ const SearchBar = ({ searchTerm, setSearchTerm, onSearchSubmit }) => {
   };
 
   return (
-    <div className="h-10">
+    <div className="w-full sm:w-auto h-10">
       <input
         type="text"
         value={searchTerm}

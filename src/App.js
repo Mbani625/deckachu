@@ -15,6 +15,7 @@ function App() {
   const [subtypeFilter, setSubtypeFilter] = useState("");
   const [pokemonTypeFilter, setPokemonTypeFilter] = useState("");
   const [sortOption, setSortOption] = useState("");
+  const [showFilters, setShowFilters] = useState(false);
   const { results, searchCards, loadMore, page, allResults } = useCardSearch();
 
   const handleSearch = () => {
@@ -118,12 +119,12 @@ function App() {
       {/* Scrollable main content */}
       <div className="flex-grow overflow-y-auto p-4 pt-0">
         <div className="sticky top-0 z-20 bg-gray-900 p-3 shadow-md">
-          <h1 className="text-3xl font-bold mb-3 text-white text-center">
+          <h1 className="text-2xl sm:text-3xl font-bold mb-3 text-white text-center">
             Deckachu – Pokémon Deckbuilder
           </h1>
-          <div className="flex items-center gap-2">
+          <div className="flex flex-col sm:flex-row flex-wrap items-stretch sm:items-center gap-2">
             {/* Vertically aligned search section */}
-            <div className="flex items-center gap-2 h-12">
+            <div className="flex flex-col sm:flex-row items-stretch sm:items-center gap-2 w-full">
               <SearchBar
                 searchTerm={searchTerm}
                 setSearchTerm={setSearchTerm}
@@ -136,7 +137,10 @@ function App() {
                 Search
               </button>
             </div>
-            <div className="w-px h-8 bg-gray-700 mx-2"></div> {/* divider */}
+            <div className="hidden sm:block w-px h-8 bg-gray-700 mx-2"></div>{" "}
+            {/* vertical on sm+ */}
+            <div className="block sm:hidden h-px w-full bg-gray-700 my-2"></div>{" "}
+            {/* horizontal on mobile */}
             {/* Uniform-width filter dropdowns */}
             <div className="flex flex-wrap items-center gap-2">
               <FilterDropdown
@@ -152,6 +156,26 @@ function App() {
                 value={typeFilter}
                 onChange={setTypeFilter}
                 options={["Pokémon", "Trainer", "Energy"]}
+                className="w-[180px]"
+              />
+
+              <FilterDropdown
+                label="Pokémon Type"
+                value={pokemonTypeFilter}
+                onChange={setPokemonTypeFilter}
+                options={[
+                  "Colorless",
+                  "Darkness",
+                  "Dragon",
+                  "Fairy",
+                  "Fighting",
+                  "Fire",
+                  "Grass",
+                  "Lightning",
+                  "Metal",
+                  "Psychic",
+                  "Water",
+                ]}
                 className="w-[180px]"
               />
 
@@ -182,25 +206,6 @@ function App() {
               />
 
               <FilterDropdown
-                label="Pokémon Type"
-                value={pokemonTypeFilter}
-                onChange={setPokemonTypeFilter}
-                options={[
-                  "Colorless",
-                  "Darkness",
-                  "Dragon",
-                  "Fairy",
-                  "Fighting",
-                  "Fire",
-                  "Grass",
-                  "Lightning",
-                  "Metal",
-                  "Psychic",
-                  "Water",
-                ]}
-                className="w-[180px]"
-              />
-              <FilterDropdown
                 label="Sort By"
                 value={sortOption}
                 onChange={setSortOption}
@@ -230,7 +235,7 @@ function App() {
       </div>
 
       {/* Fixed deck view at bottom */}
-      <div className="fixed bottom-0 left-0 right-0 h-[40vh] bg-gray-950 border-t border-gray-800 overflow-y-auto z-10 p-3">
+      <div className="fixed bottom-0 left-0 right-0 h-[35vh] sm:h-[40vh] bg-gray-950 border-t border-gray-800 overflow-y-auto z-10 p-3">
         <DeckView
           deck={deck}
           onAdd={handleAddToDeck}
