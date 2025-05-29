@@ -243,7 +243,7 @@ function App() {
         <div className="flex-grow overflow-y-auto mt-[100px] p-4 pt-0">
           <CardGrid
             cards={sortedResults}
-            handleAddToDeck={handleAddToDeck}
+            onAdd={handleAddToDeck}
             loadMore={loadMore}
             hasMore={page < 10}
           />
@@ -262,7 +262,7 @@ function App() {
       </div>
 
       {/* Fixed deck view at bottom */}
-      <div className="fixed bottom-0 left-0 right-0 h-[35vh] sm:h-[40vh] bg-gray-950 border-t border-gray-800 overflow-y-auto z-10 p-3">
+      <div className="fixed bottom-0 left-0 right-0 h-[25vh] sm:h-[40vh] bg-gray-950 border-t border-gray-800 overflow-y-auto z-10 p-3">
         <DeckView
           deck={deck}
           onAdd={handleAddToDeck}
