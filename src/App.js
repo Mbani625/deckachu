@@ -15,7 +15,6 @@ function App() {
   const [subtypeFilter, setSubtypeFilter] = useState("");
   const [pokemonTypeFilter, setPokemonTypeFilter] = useState("");
   const [sortOption, setSortOption] = useState("");
-  const [showFilters, setShowFilters] = useState(false);
   const { results, searchCards, loadMore, page, allResults } = useCardSearch();
 
   const handleSearch = () => {
@@ -124,7 +123,7 @@ function App() {
           </h1>
           <div className="flex flex-col sm:flex-row flex-wrap items-stretch sm:items-center gap-2">
             {/* Vertically aligned search section */}
-            <div className="flex flex-col sm:flex-row items-stretch sm:items-center gap-2 w-full">
+            <div className="flex flex-col sm:flex-row items-stretch sm:items-center  gap-2 w-full">
               <SearchBar
                 searchTerm={searchTerm}
                 setSearchTerm={setSearchTerm}
