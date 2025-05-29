@@ -23,7 +23,7 @@ function App() {
   const lastScrollTop = useRef(0);
   const scrollDirection = useRef("down");
   const scrollUpDistance = useRef(0);
-  const SCROLL_UP_THRESHOLD = 150;
+  const SCROLL_UP_THRESHOLD = 100;
 
   useEffect(() => {
     const handleScroll = () => {
