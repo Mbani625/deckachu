@@ -14,7 +14,11 @@ const useCardSearch = () => {
     const q = [];
 
     if (query && query.trim().length > 0) {
-      q.push(`name:${query}`);
+      const trimmedQuery = query.trim();
+      const quotedQuery = trimmedQuery.includes(" ")
+        ? `"${trimmedQuery}"`
+        : trimmedQuery;
+      q.push(`name:${quotedQuery}`);
     }
 
     if (filters.format === "standard") {
@@ -23,7 +27,7 @@ const useCardSearch = () => {
       );
     }
 
-    if (filters.cardType) {
+    if (filters.cardType && filters.cardType !== "") {
       q.push(`supertype:${filters.cardType}`);
     }
 
@@ -64,6 +68,16 @@ const useCardSearch = () => {
       const data = await res.json();
       const allData = Array.isArray(data.data) ? data.data : [];
 
+      if (allData.length > 200) {
+        alert(
+          "Too many results! Please apply additional filters to narrow your search."
+        );
+        setResults([]);
+        setAllResults([]);
+        setIsLoading(false);
+        return;
+      }
+
       cardSearchCache[cacheKey] = allData;
       applySortAndPaginate(allData, filters, 1);
     } catch (err) {
@@ -103,7 +117,6 @@ const useCardSearch = () => {
 
   const loadMore = () => {
     const nextPage = page + 1;
-    const { filters } = lastSearchParams.current;
 
     const startIndex = (nextPage - 1) * 20;
     const endIndex = startIndex + 20;

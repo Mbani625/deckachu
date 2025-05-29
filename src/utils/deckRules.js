@@ -52,6 +52,18 @@ export const getCardNameCount = (deck, cardName, referenceCard = null) => {
 export const canAddCardToDeck = (deck, card) => {
   if (isBasicEnergy(card)) return true;
 
+  // Normalize rarity
+  const rarity = card.rarity?.toLowerCase() || "";
+
+  // Check Ace Spec rule
+  if (rarity.includes("ace")) {
+    const totalAceSpecs = Object.values(deck)
+      .filter(({ card }) => (card.rarity?.toLowerCase() || "").includes("ace"))
+      .reduce((sum, { count }) => sum + count, 0);
+
+    if (totalAceSpecs >= 1) return false;
+  }
+
   const nameCount = getCardNameCount(deck, card.name, card);
   return nameCount < 4;
 };

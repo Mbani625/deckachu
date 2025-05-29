@@ -11,7 +11,7 @@ function App() {
   const [searchTerm, setSearchTerm] = useState("");
   const [deck, setDeck] = useState({});
   const [format, setFormat] = useState("standard");
-  const [typeFilter, setTypeFilter] = useState("Pokémon");
+  const [typeFilter, setTypeFilter] = useState("");
   const [subtypeFilter, setSubtypeFilter] = useState("");
   const [pokemonTypeFilter, setPokemonTypeFilter] = useState("");
   const [sortOption, setSortOption] = useState("");
@@ -28,7 +28,7 @@ function App() {
       queryParts.push(`legalities.${format}:legal`);
     }
 
-    if (typeFilter && typeFilter !== "all") {
+    if (typeFilter && typeFilter !== "") {
       queryParts.push(`supertype:"${typeFilter}"`);
     }
 
@@ -146,6 +146,7 @@ function App() {
                 options={["standard", "expanded", "unlimited"]}
                 className="w-[180px]"
               />
+
               <FilterDropdown
                 label="Card Type"
                 value={typeFilter}
@@ -153,6 +154,7 @@ function App() {
                 options={["Pokémon", "Trainer", "Energy"]}
                 className="w-[180px]"
               />
+
               <FilterDropdown
                 label="Subtype"
                 value={subtypeFilter}
@@ -178,6 +180,7 @@ function App() {
                 ]}
                 className="w-[180px]"
               />
+
               <FilterDropdown
                 label="Pokémon Type"
                 value={pokemonTypeFilter}
