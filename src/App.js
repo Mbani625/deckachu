@@ -21,24 +21,40 @@ function App() {
 
   const [showHeader, setShowHeader] = useState(true);
   const lastScrollTop = useRef(0);
+  const scrollDirection = useRef("down");
+  const scrollUpDistance = useRef(0);
+  const SCROLL_UP_THRESHOLD = 150;
 
   useEffect(() => {
     const handleScroll = () => {
       const scrollTop = window.scrollY || document.documentElement.scrollTop;
-      const scrollDelta = lastScrollTop.current - scrollTop;
+      const prevScroll = lastScrollTop.current;
+      const delta = scrollTop - prevScroll;
 
-      // Only show header if scrolling up by 50px or more
-      if (scrollDelta > 50) {
-        setShowHeader(true);
-      }
-
-      // Hide header if scrolling down
-      if (scrollDelta < -10) {
+      // Scrolling down
+      if (delta > 0) {
+        if (scrollDirection.current !== "down") {
+          scrollDirection.current = "down";
+          scrollUpDistance.current = 0;
+        }
         setShowHeader(false);
       }
 
-      setShowBackToTop(scrollTop > 30); // Show back-to-top after 300px
+      // Scrolling up
+      else if (delta < 0) {
+        if (scrollDirection.current !== "up") {
+          scrollDirection.current = "up";
+          scrollUpDistance.current = 0;
+        }
 
+        scrollUpDistance.current += Math.abs(delta);
+
+        if (scrollUpDistance.current > SCROLL_UP_THRESHOLD) {
+          setShowHeader(true);
+        }
+      }
+
+      setShowBackToTop(scrollTop > 300);
       lastScrollTop.current = scrollTop <= 0 ? 0 : scrollTop;
     };
 
