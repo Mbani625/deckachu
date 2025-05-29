@@ -32,7 +32,7 @@ const DeckView = ({ deck, onAdd, onRemove, setSearchTerm }) => {
 
   return (
     <div className="relative">
-      <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-6 gap-4 p-4 h-auto">
+      <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-6 mt-[20px] gap-4 p-4 h-auto">
         <h2 className="text-xl font-bold">Your Deck</h2>
         <p className="text-sm text-gray-400">
           Total Cards:{" "}

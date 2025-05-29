@@ -9,24 +9,30 @@ import useCardSearch from "./hooks/useCardSearch";
 import FilterDropdown from "./components/FilterDropdown";
 
 function App() {
-  const [searchTerm, setSearchTerm] = useState("");
   const [deck, setDeck] = useState(() => {
     const saved = localStorage.getItem("deckachu_deck");
     return saved ? JSON.parse(saved) : [];
   });
+  const [isDeckExpanded, setIsDeckExpanded] = useState(false);
+  const toggleDeckView = () => {
+    setIsDeckExpanded((prev) => !prev);
+  };
+
+  const [searchTerm, setSearchTerm] = useState("");
   const [format, setFormat] = useState("standard");
   const [typeFilter, setTypeFilter] = useState("");
   const [subtypeFilter, setSubtypeFilter] = useState("");
   const [pokemonTypeFilter, setPokemonTypeFilter] = useState("");
   const [sortOption, setSortOption] = useState("");
   const { results, searchCards, loadMore, page, allResults } = useCardSearch();
+  const [hasSearched, setHasSearched] = useState(false);
+
   const [showBackToTop, setShowBackToTop] = useState(false);
   const [showHeader, setShowHeader] = useState(true);
   const lastScrollTop = useRef(0);
   const scrollDirection = useRef("down");
   const scrollUpDistance = useRef(0);
   const SCROLL_UP_THRESHOLD = 100;
-  const [hasSearched, setHasSearched] = useState(false);
 
   useEffect(() => {
     const handleScroll = () => {
@@ -300,15 +306,20 @@ function App() {
       </div>
 
       {/* Fixed deck view at bottom */}
-      <div className="fixed bottom-0 left-0 right-0 h-[25vh] sm:h-[40vh] bg-gray-950 border-t border-gray-800 overflow-y-auto z-10 p-3">
-        <DeckView
-          deck={deck}
-          onAdd={handleAddToDeck}
-          onRemove={handleRemoveFromDeck}
-          setSearchTerm={setSearchTerm}
-        />
+      <div
+        className={`fixed bottom-0 left-0 right-0 bg-gray-950 border-t border-gray-800 z-10 p-5 transition-all duration-300 overflow-y-auto ${
+          isDeckExpanded ? "h-[77%]" : "h-[25vh] sm:h-[40vh] md:h-[40vh]"
+        }`}
+      >
         <button
-          className="bg-red-600 text-white px-3 py-1 rounded hover:bg-red-700"
+          onClick={toggleDeckView}
+          className="absolute top-2 right-3 z-20 px-3 py-1 rounded bg-blue-600 text-white hover:bg-blue-700"
+        >
+          {isDeckExpanded ? "Compress" : "Expand"}
+        </button>
+
+        <button
+          className="absolute top-2 left-3 z-20 px-3 py-1 rounded bg-red-600 text-white hover:bg-red-700"
           onClick={() => {
             if (
               window.confirm("Are you sure you want to clear your entire deck?")
@@ -320,6 +331,13 @@ function App() {
         >
           Clear Deck
         </button>
+
+        <DeckView
+          deck={deck}
+          onAdd={handleAddToDeck}
+          onRemove={handleRemoveFromDeck}
+          setSearchTerm={setSearchTerm}
+        />
       </div>
 
       {showBackToTop && (
