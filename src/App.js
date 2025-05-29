@@ -57,7 +57,7 @@ function App() {
         }
       }
 
-      setShowBackToTop(scrollTop > 300);
+      setShowBackToTop(scrollTop > 30);
       lastScrollTop.current = scrollTop <= 0 ? 0 : scrollTop;
     };
 
