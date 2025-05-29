@@ -21,7 +21,15 @@ const useCardSearch = () => {
       q.push(`name:${quotedQuery}`);
     }
 
-    if (filters.format === "standard") {
+    const lowerQuery = query.toLowerCase();
+    const isBasicEnergySearch =
+      (lowerQuery.includes("basic energy") ||
+        (lowerQuery.includes("basic") && lowerQuery.includes("energy")) ||
+        lowerQuery.includes("basic")) &&
+      (filters.cardType === "Energy" || filters.cardType === "All");
+
+    // Only apply regulation marks if not doing a basic energy search
+    if (filters.format === "standard" && !isBasicEnergySearch) {
       q.push(
         '(regulationMark:"G" OR regulationMark:"H" OR regulationMark:"I" OR regulationMark:"J" )'
       );

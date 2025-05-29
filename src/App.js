@@ -307,8 +307,10 @@ function App() {
 
       {/* Fixed deck view at bottom */}
       <div
-        className={`fixed bottom-0 left-0 right-0 bg-gray-950 border-t border-gray-800 z-10 p-5 transition-all duration-300 overflow-y-auto ${
-          isDeckExpanded ? "h-[77%]" : "h-[25vh] sm:h-[40vh] md:h-[40vh]"
+        className={`fixed left-0 right-0 p-4 bg-gray-950 border-t border-gray-800 transition-all duration-300 overflow-y-auto ${
+          isDeckExpanded
+            ? "top-0 bottom-0 z-[9999]" // Full-screen overlay
+            : "bottom-0 z-[30] h-[25vh] sm:h-[40vh] md:h-[40vh]"
         }`}
       >
         <button

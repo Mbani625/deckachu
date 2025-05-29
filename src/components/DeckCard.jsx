@@ -17,7 +17,7 @@ const DeckCard = ({ card, count, onAdd, onRemove, onExpand }) => {
 
   return (
     <div
-      className={`bg-gray-800 p-2 rounded shadow text-center flex flex-wrap flex-col items-center transition-all duration-300 opacity-0 animate-fade-in ${pulse}`}
+      className={`relative bg-gray-800 p-2 rounded shadow text-center flex flex-col items-center justify-between transition-all duration-300 opacity-0 animate-fade-in ${pulse}`}
     >
       <div className="cursor-pointer" onClick={() => onExpand(card)}>
         <img
