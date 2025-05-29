@@ -25,9 +25,19 @@ function App() {
   useEffect(() => {
     const handleScroll = () => {
       const scrollTop = window.scrollY || document.documentElement.scrollTop;
+      const scrollDelta = lastScrollTop.current - scrollTop;
 
-      setShowHeader(scrollTop < lastScrollTop.current); // scrolling up = show header
-      setShowBackToTop(scrollTop > 30); // show back to top if scroll exceeds 300px
+      // Only show header if scrolling up by 50px or more
+      if (scrollDelta > 50) {
+        setShowHeader(true);
+      }
+
+      // Hide header if scrolling down
+      if (scrollDelta < -10) {
+        setShowHeader(false);
+      }
+
+      setShowBackToTop(scrollTop > 30); // Show back-to-top after 300px
 
       lastScrollTop.current = scrollTop <= 0 ? 0 : scrollTop;
     };
