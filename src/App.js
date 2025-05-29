@@ -24,6 +24,7 @@ function App() {
   const scrollDirection = useRef("down");
   const scrollUpDistance = useRef(0);
   const SCROLL_UP_THRESHOLD = 100;
+  const [hasSearched, setHasSearched] = useState(false);
 
   useEffect(() => {
     const handleScroll = () => {
@@ -37,14 +38,16 @@ function App() {
           scrollDirection.current = "down";
           scrollUpDistance.current = 0;
         }
-        setShowHeader(false);
+        if (hasSearched) {
+          setShowHeader(false);
+        }
       }
 
       // Scrolling up
       else if (delta < 0) {
         if (scrollDirection.current !== "up") {
           scrollDirection.current = "up";
-          scrollUpDistance.current = 0;
+          scrollUpDistance.current = 50;
         }
 
         scrollUpDistance.current += Math.abs(delta);
@@ -100,6 +103,7 @@ function App() {
         false
       );
     }
+    setHasSearched(true);
   };
 
   const sortedResults = useMemo(() => {
