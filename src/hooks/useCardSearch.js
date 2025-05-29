@@ -13,11 +13,10 @@ const useCardSearch = () => {
   const searchCards = async (query = "", filters = {}) => {
     const q = [];
 
-    if (query && query.trim().length > 0) {
-      const trimmedQuery = query.trim();
-      const quotedQuery = trimmedQuery.includes(" ")
-        ? `"${trimmedQuery}"`
-        : trimmedQuery;
+    if (query.trim()) {
+      const quotedQuery = query.includes(" ")
+        ? `"${query.trim()}"`
+        : query.trim();
       q.push(`name:${quotedQuery}`);
     }
 
@@ -28,10 +27,9 @@ const useCardSearch = () => {
         lowerQuery.includes("basic")) &&
       (filters.cardType === "Energy" || filters.cardType === "All");
 
-    // Only apply regulation marks if not doing a basic energy search
     if (filters.format === "standard" && !isBasicEnergySearch) {
       q.push(
-        '(regulationMark:"G" OR regulationMark:"H" OR regulationMark:"I" OR regulationMark:"J" )'
+        '(regulationMark:"G" OR regulationMark:"H" OR regulationMark:"I" OR regulationMark:"J")'
       );
     }
 
@@ -62,32 +60,57 @@ const useCardSearch = () => {
     lastSearchParams.current = { query, filters };
 
     if (cardSearchCache[cacheKey]) {
-      const cached = cardSearchCache[cacheKey];
-      applySortAndPaginate(cached, filters, 1);
+      applySortAndPaginate(cardSearchCache[cacheKey], filters, 1);
       return;
     }
 
     try {
       const res = await fetch(
-        `https://api.pokemontcg.io/v2/cards?q=${encodeURIComponent(
-          fullQuery
-        )}&pageSize=250`
+        `https://api.pokemontcg.io/v2/cards?q=${encodeURIComponent(fullQuery)}`
       );
       const data = await res.json();
-      const allData = Array.isArray(data.data) ? data.data : [];
+      const allData = data?.data || [];
 
-      if (allData.length > 200) {
-        alert(
-          "Too many results! Please apply additional filters to narrow your search."
-        );
-        setResults([]);
-        setAllResults([]);
-        setIsLoading(false);
-        return;
-      }
+      const fetchSetPtgcoCode = async (setId) => {
+        try {
+          const setRes = await fetch(
+            `https://api.pokemontcg.io/v2/sets/${setId}`
+          );
+          const setData = await setRes.json();
+          return setData?.data?.ptcgoCode || "?";
+        } catch {
+          return "?";
+        }
+      };
 
-      cardSearchCache[cacheKey] = allData;
-      applySortAndPaginate(allData, filters, 1);
+      const mappedCards = await Promise.all(
+        allData.map(async (card) => {
+          let ptcgoCode = card.set?.ptcgoCode || "?";
+
+          if (ptcgoCode === "?" && card.set?.id) {
+            ptcgoCode = await fetchSetPtgcoCode(card.set.id);
+          }
+
+          return {
+            id: card.id,
+            name: card.name,
+            supertype: card.supertype,
+            subtypes: card.subtypes,
+            types: card.types,
+            images: card.images,
+            number: card.number || "",
+            set: {
+              id: card.set?.id || "",
+              ptcgoCode,
+              name: card.set?.name || "",
+              series: card.set?.series || "",
+            },
+          };
+        })
+      );
+
+      cardSearchCache[cacheKey] = mappedCards;
+      applySortAndPaginate(mappedCards, filters, 1);
     } catch (err) {
       console.error(err);
       setError("Search failed.");
@@ -125,12 +148,9 @@ const useCardSearch = () => {
 
   const loadMore = () => {
     const nextPage = page + 1;
-
     const startIndex = (nextPage - 1) * 20;
     const endIndex = startIndex + 20;
-
     const nextBatch = allResults.slice(startIndex, endIndex);
-
     setResults((prev) => [...prev, ...nextBatch]);
     setPage(nextPage);
   };

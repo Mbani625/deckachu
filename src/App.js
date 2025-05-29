@@ -7,6 +7,7 @@ import DeckView from "./components/DeckView";
 import { canAddCardToDeck } from "./utils/deckRules";
 import useCardSearch from "./hooks/useCardSearch";
 import FilterDropdown from "./components/FilterDropdown";
+import { formatDeckForExport } from "./utils/formatDeckForExport";
 
 function App() {
   const [deck, setDeck] = useState(() => {
@@ -72,6 +73,19 @@ function App() {
     window.addEventListener("scroll", handleScroll);
     return () => window.removeEventListener("scroll", handleScroll);
   });
+
+  const handleExportDeck = () => {
+    const deckArray = Object.values(deck); // converts object to array of { card, count }
+
+    const formatted = formatDeckForExport(deckArray);
+    const blob = new Blob([formatted], { type: "text/plain" });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement("a");
+    a.href = url;
+    a.download = "deck.txt";
+    a.click();
+    URL.revokeObjectURL(url);
+  };
 
   const handleSearch = () => {
     let queryParts = [];
@@ -140,6 +154,8 @@ function App() {
 
   const handleAddToDeck = (card) => {
     if (!canAddCardToDeck(deck, card)) return;
+
+    console.log("ADDING CARD TO DECK:", card);
 
     setDeck((prev) => {
       const existing = prev[card.id];
@@ -313,26 +329,37 @@ function App() {
             : "bottom-0 z-[30] h-[25vh] sm:h-[40vh] md:h-[40vh]"
         }`}
       >
-        <button
-          onClick={toggleDeckView}
-          className="absolute top-2 right-3 z-20 px-3 py-1 rounded bg-blue-600 text-white hover:bg-blue-700"
-        >
-          {isDeckExpanded ? "Compress" : "Expand"}
-        </button>
+        <div className="flex justify-evenly items-center">
+          <button
+            className="flex top-2 z-20 px-3 py-1 justify-center rounded w-[90px] bg-red-600 text-white hover:bg-red-700"
+            onClick={() => {
+              if (
+                window.confirm(
+                  "Are you sure you want to clear your entire deck?"
+                )
+              ) {
+                setDeck({});
+                localStorage.removeItem("deckachu_mainDeck");
+              }
+            }}
+          >
+            Clear
+          </button>
 
-        <button
-          className="absolute top-2 left-3 z-20 px-3 py-1 rounded bg-red-600 text-white hover:bg-red-700"
-          onClick={() => {
-            if (
-              window.confirm("Are you sure you want to clear your entire deck?")
-            ) {
-              setDeck({});
-              localStorage.removeItem("deckachu_mainDeck");
-            }
-          }}
-        >
-          Clear Deck
-        </button>
+          <button
+            onClick={handleExportDeck}
+            className="flex top-2 px-3 py-1 rounded justify-center w-[90px] bg-green-600 hover:bg-green-700 text-white"
+          >
+            Export
+          </button>
+
+          <button
+            onClick={toggleDeckView}
+            className="flex top-2 z-20 px-3 py-1 rounded justify-center w-[90px] bg-blue-600 text-white hover:bg-blue-700"
+          >
+            {isDeckExpanded ? "Compress" : "Expand"}
+          </button>
+        </div>
 
         <DeckView
           deck={deck}
