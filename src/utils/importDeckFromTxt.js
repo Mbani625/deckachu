@@ -1,6 +1,5 @@
-// utils/importDeckFromTxt.js
-export const importDeckFromTxt = async (file, setDeck) => {
-  const text = await file.text();
+export const importDeckFromTxt = async (input, setDeck, isRawText = false) => {
+  const text = isRawText ? input : await input.text();
   const lines = text
     .split("\n")
     .map((line) => line.trim())
@@ -9,7 +8,7 @@ export const importDeckFromTxt = async (file, setDeck) => {
   let ptcgoToSetIdMap = {};
 
   const loadSetMappings = async () => {
-    if (Object.keys(ptcgoToSetIdMap).length > 0) return; // already loaded
+    if (Object.keys(ptcgoToSetIdMap).length > 0) return;
 
     const res = await fetch("https://api.pokemontcg.io/v2/sets");
     const data = await res.json();
@@ -38,7 +37,7 @@ export const importDeckFromTxt = async (file, setDeck) => {
       currentSection = "Energy";
       continue;
     } else if (/^Total Cards/i.test(line)) {
-      break; // stop parsing
+      break;
     }
 
     const match = line.match(/^(\d+)\s+(.*?)\s+([A-Z0-9]+)\s+(\d+)$/);
@@ -50,7 +49,7 @@ export const importDeckFromTxt = async (file, setDeck) => {
       name: name.trim(),
       count: parseInt(count, 10),
       set: setCode.trim(),
-      number: setNumber.trim(), // ✅ add this
+      number: setNumber.trim(),
       section: currentSection,
     });
   }

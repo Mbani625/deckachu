@@ -9,6 +9,7 @@ import useCardSearch from "./hooks/useCardSearch";
 import FilterDropdown from "./components/FilterDropdown";
 import { formatDeckForExport } from "./utils/formatDeckForExport";
 import { importDeckFromTxt } from "./utils/importDeckFromTxt";
+import DeckTextImportModal from "./components/DeckTextImportModal";
 
 function App() {
   const [deck, setDeck] = useState(() => {
@@ -35,6 +36,7 @@ function App() {
   const scrollDirection = useRef("down");
   const scrollUpDistance = useRef(0);
   const SCROLL_UP_THRESHOLD = 100;
+  const [showOptionsMenu, setShowOptionsMenu] = useState(false);
 
   const activeFilters = useMemo(
     () => ({
@@ -46,6 +48,21 @@ function App() {
     }),
     [format, typeFilter, subtypeFilter, pokemonTypeFilter, sortOption]
   );
+
+  const [showTextImport, setShowTextImport] = useState(false);
+  const [rawDeckText, setRawDeckText] = useState("");
+
+  const handleImportFromText = () => {
+    importDeckFromTxt(rawDeckText, setDeck, true);
+    setRawDeckText("");
+    setShowTextImport(false);
+  };
+
+  const handleImportDeck = (event) => {
+    const file = event.target.files[0];
+    if (!file) return;
+    importDeckFromTxt(file, setDeck, false); // `false` = not raw text
+  };
 
   useEffect(() => {
     const handleScroll = () => {
@@ -97,12 +114,6 @@ function App() {
     a.download = "deck.txt";
     a.click();
     URL.revokeObjectURL(url);
-  };
-
-  const handleImportDeck = (event) => {
-    const file = event.target.files[0];
-    if (!file) return;
-    importDeckFromTxt(file, setDeck);
   };
 
   const handleSearch = () => {
@@ -349,43 +360,140 @@ function App() {
             : "bottom-0 z-[30] h-[25vh] sm:h-[40vh] md:h-[40vh]"
         }`}
       >
-        <div className="flex justify-evenly items-center">
-          <button
-            className="flex top-2 z-20 px-3 py-1 justify-center rounded w-[90px] bg-red-600 text-white hover:bg-red-700"
-            onClick={() => {
-              if (
-                window.confirm(
-                  "Are you sure you want to clear your entire deck?"
-                )
-              ) {
-                setDeck({});
-                localStorage.removeItem("deckachu_mainDeck");
-              }
-            }}
-          >
-            Clear
-          </button>
-
-          <button
-            onClick={handleExportDeck}
-            className="flex top-2 px-3 py-1 rounded justify-center w-[90px] bg-green-600 hover:bg-green-700 text-white"
-          >
-            Export
-          </button>
-
+        {/* BUTTON GROUP */}
+        <div className="w-full flex flex-col md:flex-row justify-evenly items-center gap-2 relative">
+          {/* Hidden file input */}
           <input
             type="file"
             accept=".txt"
+            id="deck-file-input"
+            className="hidden"
             onChange={handleImportDeck}
-            className="text-white text-sm my-2"
           />
 
-          <button
-            onClick={toggleDeckView}
-            className="flex top-2 z-20 px-3 py-1 rounded justify-center w-[90px] bg-blue-600 text-white hover:bg-blue-700"
-          >
-            {isDeckExpanded ? "Compress" : "Expand"}
-          </button>
+          {/* DESKTOP BUTTON GROUP */}
+          <div className="hidden md:flex gap-2">
+            <button
+              onClick={toggleDeckView}
+              className="bg-yellow-600 hover:bg-yellow-700 text-white font-semibold px-3 py-1 rounded"
+            >
+              {isDeckExpanded ? "Collapse Deck" : "Expand Deck"}
+            </button>
+
+            <button
+              onClick={() => document.getElementById("deck-file-input").click()}
+              className="bg-blue-600 hover:bg-blue-700 text-white font-semibold px-3 py-1 rounded"
+            >
+              Import File
+            </button>
+
+            <button
+              onClick={() => setShowTextImport(true)}
+              className="bg-purple-600 hover:bg-purple-700 text-white font-semibold px-3 py-1 rounded"
+            >
+              Paste Deck Text
+            </button>
+
+            <button
+              onClick={handleExportDeck}
+              className="bg-green-600 hover:bg-green-700 text-white font-semibold px-3 py-1 rounded"
+            >
+              Export
+            </button>
+
+            <button
+              onClick={() => {
+                if (
+                  window.confirm(
+                    "Are you sure you want to clear your entire deck?"
+                  )
+                ) {
+                  setDeck({});
+                  localStorage.removeItem("deckachu_mainDeck");
+                }
+              }}
+              className="bg-red-600 hover:bg-red-700 text-white font-semibold px-3 py-1 rounded"
+            >
+              Clear
+            </button>
+          </div>
+
+          {/* MOBILE OPTIONS MENU */}
+          <div className="md:hidden w-full text-center">
+            <button
+              onClick={() => setShowOptionsMenu((prev) => !prev)}
+              className="bg-gray-700 hover:bg-gray-600 text-white font-semibold px-4 py-2 rounded w-full"
+            >
+              ⚙ Options
+            </button>
+            {showOptionsMenu && (
+              <div className="mt-2 bg-gray-900 rounded-lg shadow-lg z-50 border border-gray-700 w-full text-left">
+                <button
+                  onClick={() => {
+                    document.getElementById("deck-file-input").click();
+                    setShowOptionsMenu(false);
+                  }}
+                  className="block w-full px-4 py-2 hover:bg-gray-800"
+                >
+                  Import from File
+                </button>
+                <button
+                  onClick={() => {
+                    setShowTextImport(true);
+                    setShowOptionsMenu(false);
+                  }}
+                  className="block w-full px-4 py-2 hover:bg-gray-800"
+                >
+                  Paste Deck Text
+                </button>
+                <button
+                  onClick={() => {
+                    handleExportDeck();
+                    setShowOptionsMenu(false);
+                  }}
+                  className="block w-full px-4 py-2 hover:bg-gray-800"
+                >
+                  Export Deck
+                </button>
+                <button
+                  onClick={() => {
+                    toggleDeckView();
+                    setShowOptionsMenu(false);
+                  }}
+                  className="block w-full px-4 py-2 hover:bg-gray-800"
+                >
+                  {isDeckExpanded ? "Collapse Deck" : "Expand Deck"}
+                </button>
+
+                <button
+                  onClick={() => {
+                    setShowOptionsMenu(false);
+                    if (
+                      window.confirm(
+                        "Are you sure you want to clear your entire deck?"
+                      )
+                    ) {
+                      setDeck({});
+                      localStorage.removeItem("deckachu_mainDeck");
+                    }
+                  }}
+                  className="block w-full px-4 py-2 text-red-400 hover:bg-gray-800"
+                >
+                  Clear Deck
+                </button>
+              </div>
+            )}
+          </div>
+
+          {/* DECK TEXT MODAL */}
+          {showTextImport && (
+            <DeckTextImportModal
+              onClose={() => setShowTextImport(false)}
+              text={rawDeckText}
+              setText={setRawDeckText}
+              onImport={handleImportFromText}
+            />
+          )}
         </div>
 
         <DeckView
