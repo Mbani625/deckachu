@@ -1,4 +1,5 @@
 import React from "react";
+import { createPortal } from "react-dom";
 
 const CardExpandInfo = ({
   card,
@@ -25,21 +26,24 @@ const CardExpandInfo = ({
     onClose();
   };
 
-  return (
+  return createPortal(
     <div className="fixed inset-0 bg-black bg-opacity-80 flex items-center justify-center z-[9999] p-4 overflow-y-auto">
-      <div className="bg-gray-900 p-4 rounded-lg shadow-lg border border-gray-700 w-[350px] md:w-[450px] relative">
+      <div className="bg-gray-900 text-white p-6 rounded-lg max-w-xl w-full shadow-2xl relative">
         <button
           onClick={onClose}
-          className="absolute top-2 right-2 text-white text-sm bg-red-600 hover:bg-red-700 px-2 py-1 rounded"
+          className="absolute top-2 right-2 text-gray-400 hover:text-white text-xl"
         >
-          ✕
+          ✖
         </button>
-        <img
-          src={card.images.large || card.images.small}
-          alt={card.name}
-          className="w-full h-auto rounded mb-3"
-        />
-        <h2 className="text-lg font-bold text-white">{card.name}</h2>
+        {card.images?.large && (
+          <img
+            src={card.images.large}
+            alt={card.name}
+            className="w-full h-auto rounded-lg mb-4"
+          />
+        )}
+
+        <h2 className="text-xl font-bold mb-4">{card.name}</h2>
         <p className="text-sm text-gray-400">Set: {card.set.name}</p>
         <p className="text-sm text-gray-400">Type: {card.supertype}</p>
         {card.subtypes?.length > 0 && (
@@ -69,7 +73,8 @@ const CardExpandInfo = ({
           )}
         </div>
       </div>
-    </div>
+    </div>,
+    document.body
   );
 };
 
