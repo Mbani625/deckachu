@@ -439,16 +439,6 @@ function App() {
               </div>
             )}
           </div>
-
-          {/* DECK TEXT MODAL */}
-          {showTextImport && (
-            <DeckTextImportModal
-              onClose={() => setShowTextImport(false)}
-              text={rawDeckText}
-              setText={setRawDeckText}
-              onImport={handleImportFromText}
-            />
-          )}
         </div>
 
         <DeckView
@@ -469,6 +459,15 @@ function App() {
         >
           ↑
         </button>
+      )}
+      {/* DECK TEXT MODAL */}
+      {showTextImport && (
+        <DeckTextImportModal
+          onClose={() => setShowTextImport(false)}
+          text={rawDeckText}
+          setText={setRawDeckText}
+          onImport={handleImportFromText}
+        />
       )}
     </div>
   );
