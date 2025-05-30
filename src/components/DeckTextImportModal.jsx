@@ -3,8 +3,8 @@ import React from "react";
 
 const DeckTextImportModal = ({ onClose, onImport, text, setText }) => {
   return (
-    <div className="fixed top-0 left-0 w-screen h-screen z-[9999] bg-black bg-opacity-90 flex justify-center items-center px-4">
-      <div className="bg-gray-900 text-white p-6 rounded-lg w-[90%] max-w-xl shadow-lg relative">
+    <div className="fixed inset-0 bg-black bg-opacity-80 flex justify-center items-center z-[99999]">
+      <div className="bg-gray-900 text-white p-6 rounded-lg w-[90%] max-w-xl shadow-2xl relative z-[100000]">
         <button
           onClick={onClose}
           className="absolute top-2 right-2 text-gray-400 hover:text-white text-xl"

@@ -325,6 +325,7 @@ function App() {
             className="hidden"
             onChange={handleImportDeck}
           />
+
           {/* DESKTOP BUTTON GROUP */}
           <div className="hidden md:flex gap-2">
             <button
@@ -371,6 +372,7 @@ function App() {
               Clear
             </button>
           </div>
+
           {/* MOBILE OPTIONS MENU */}
           <div className="md:hidden w-full text-center">
             <button
@@ -438,27 +440,25 @@ function App() {
             )}
           </div>
 
-          <DeckView
-            deck={deck}
-            onAdd={handleAddToDeck}
-            onRemove={handleRemoveFromDeck}
-            setSearchTerm={setSearchTerm}
-            searchCards={searchCards}
-            filters={activeFilters}
-          />
-        </div>
-
-        {/* DECK TEXT MODAL */}
-        {showTextImport && (
-          <div className="fixed inset-0 z-[9999]">
+          {/* DECK TEXT MODAL */}
+          {showTextImport && (
             <DeckTextImportModal
               onClose={() => setShowTextImport(false)}
               text={rawDeckText}
               setText={setRawDeckText}
               onImport={handleImportFromText}
             />
-          </div>
-        )}
+          )}
+        </div>
+
+        <DeckView
+          deck={deck}
+          onAdd={handleAddToDeck}
+          onRemove={handleRemoveFromDeck}
+          setSearchTerm={setSearchTerm}
+          searchCards={searchCards}
+          filters={activeFilters}
+        />
       </div>
 
       {showBackToTop && (
