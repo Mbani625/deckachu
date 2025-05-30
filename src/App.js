@@ -1,5 +1,5 @@
 // src/App.js
-import React, { useState, useEffect, useRef, useMemo } from "react";
+import React, { useState, useEffect, useMemo } from "react";
 
 import SearchBar from "./components/SearchBar";
 import CardGrid from "./components/CardGrid";
@@ -10,6 +10,7 @@ import FilterDropdown from "./components/FilterDropdown";
 import { formatDeckForExport } from "./utils/formatDeckForExport";
 import { importDeckFromTxt } from "./utils/importDeckFromTxt";
 import DeckTextImportModal from "./components/DeckTextImportModal";
+import useScrollHeader from "./hooks/useScrollHeader";
 
 function App() {
   const [deck, setDeck] = useState(() => {
@@ -29,14 +30,10 @@ function App() {
   const [sortOption, setSortOption] = useState("");
   const { results, searchCards, loadMore, page, allResults } = useCardSearch();
   const [hasSearched, setHasSearched] = useState(false);
-
-  const [showBackToTop, setShowBackToTop] = useState(false);
-  const [showHeader, setShowHeader] = useState(true);
-  const lastScrollTop = useRef(0);
-  const scrollDirection = useRef("down");
-  const scrollUpDistance = useRef(0);
-  const SCROLL_UP_THRESHOLD = 100;
   const [showOptionsMenu, setShowOptionsMenu] = useState(false);
+  const { showHeader, showBackToTop } = useScrollHeader(100, hasSearched);
+  const [showTextImport, setShowTextImport] = useState(false);
+  const [rawDeckText, setRawDeckText] = useState("");
 
   const activeFilters = useMemo(
     () => ({
@@ -49,9 +46,6 @@ function App() {
     [format, typeFilter, subtypeFilter, pokemonTypeFilter, sortOption]
   );
 
-  const [showTextImport, setShowTextImport] = useState(false);
-  const [rawDeckText, setRawDeckText] = useState("");
-
   const handleImportFromText = () => {
     importDeckFromTxt(rawDeckText, setDeck, true);
     setRawDeckText("");
@@ -63,45 +57,6 @@ function App() {
     if (!file) return;
     importDeckFromTxt(file, setDeck, false); // `false` = not raw text
   };
-
-  useEffect(() => {
-    const handleScroll = () => {
-      const scrollTop = window.scrollY || document.documentElement.scrollTop;
-      const prevScroll = lastScrollTop.current;
-      const delta = scrollTop - prevScroll;
-
-      // Scrolling down
-      if (delta > 0) {
-        if (scrollDirection.current !== "down") {
-          scrollDirection.current = "down";
-          scrollUpDistance.current = 0;
-        }
-        if (hasSearched) {
-          setShowHeader(false);
-        }
-      }
-
-      // Scrolling up
-      else if (delta < 0) {
-        if (scrollDirection.current !== "up") {
-          scrollDirection.current = "up";
-          scrollUpDistance.current = 50;
-        }
-
-        scrollUpDistance.current += Math.abs(delta);
-
-        if (scrollUpDistance.current > SCROLL_UP_THRESHOLD) {
-          setShowHeader(true);
-        }
-      }
-
-      setShowBackToTop(scrollTop > 30);
-      lastScrollTop.current = scrollTop <= 0 ? 0 : scrollTop;
-    };
-
-    window.addEventListener("scroll", handleScroll);
-    return () => window.removeEventListener("scroll", handleScroll);
-  });
 
   const handleExportDeck = async () => {
     const deckArray = Object.values(deck);
@@ -487,12 +442,14 @@ function App() {
 
           {/* DECK TEXT MODAL */}
           {showTextImport && (
-            <DeckTextImportModal
-              onClose={() => setShowTextImport(false)}
-              text={rawDeckText}
-              setText={setRawDeckText}
-              onImport={handleImportFromText}
-            />
+            <div className="fixed inset-0 z-[9999]">
+              <DeckTextImportModal
+                onClose={() => setShowTextImport(false)}
+                text={rawDeckText}
+                setText={setRawDeckText}
+                onImport={handleImportFromText}
+              />
+            </div>
           )}
         </div>
 
