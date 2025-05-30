@@ -31,7 +31,7 @@ const CardExpandInfo = ({
       <div className="bg-gray-900 text-white p-6 rounded-lg max-w-xl w-full shadow-2xl relative">
         <button
           onClick={onClose}
-          className="absolute top-2 right-2 text-gray-400 hover:text-white text-xl"
+          className="absolute top-2 right-2 text-white hover:text-white text-xl"
         >
           ✖
         </button>
