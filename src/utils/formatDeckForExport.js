@@ -1,4 +1,4 @@
-export function formatDeckForExport(deck) {
+export async function formatDeckForExport(deck) {
   if (!Array.isArray(deck)) return "";
 
   const sections = {
@@ -9,10 +9,31 @@ export function formatDeckForExport(deck) {
 
   let total = 0;
 
-  deck.forEach(({ card, count }) => {
-    const line = `${count} ${card.name} ${
-      card.set?.ptcgoCode || card.set?.id || "?"
-    } ${card.number}`;
+  // Cache set ID → ptcgoCode
+  const setMap = {};
+
+  const fetchSetPtgcoCode = async (setId) => {
+    if (setMap[setId]) return setMap[setId];
+    try {
+      const res = await fetch(`https://api.pokemontcg.io/v2/sets/${setId}`);
+      const data = await res.json();
+      const ptcgoCode = data?.data?.ptcgoCode || setId;
+      setMap[setId] = ptcgoCode;
+      return ptcgoCode;
+    } catch {
+      return setId;
+    }
+  };
+
+  for (const { card, count } of deck) {
+    let ptcgoCode = card.set?.ptcgoCode || "?";
+
+    // If it's missing or placeholder, try to fetch it
+    if (ptcgoCode === "?" && card.set?.id) {
+      ptcgoCode = await fetchSetPtgcoCode(card.set.id);
+    }
+
+    const line = `${count} ${card.name} ${ptcgoCode} ${card.number}`;
 
     if (card.supertype === "Pokémon") {
       sections.Pokémon.push(line);
@@ -21,8 +42,9 @@ export function formatDeckForExport(deck) {
     } else if (card.supertype === "Energy") {
       sections.Energy.push(line);
     }
+
     total += count;
-  });
+  }
 
   return (
     `Pokémon: ${sections.Pokémon.length}\n` +

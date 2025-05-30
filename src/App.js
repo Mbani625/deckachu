@@ -86,10 +86,10 @@ function App() {
     return () => window.removeEventListener("scroll", handleScroll);
   });
 
-  const handleExportDeck = () => {
-    const deckArray = Object.values(deck); // converts object to array of { card, count }
+  const handleExportDeck = async () => {
+    const deckArray = Object.values(deck);
+    const formatted = await formatDeckForExport(deckArray); // ✅ await it!
 
-    const formatted = formatDeckForExport(deckArray);
     const blob = new Blob([formatted], { type: "text/plain" });
     const url = URL.createObjectURL(blob);
     const a = document.createElement("a");
