@@ -2,7 +2,14 @@ import React, { useState } from "react";
 import DeckSection from "./DeckSection";
 import CardExpandInfo from "./CardExpandInfo";
 
-const DeckView = ({ deck, onAdd, onRemove, setSearchTerm }) => {
+const DeckView = ({
+  deck,
+  onAdd,
+  onRemove,
+  setSearchTerm,
+  searchCards,
+  filters,
+}) => {
   const [expandedCard, setExpandedCard] = useState(null);
 
   const deckArray = Object.values(deck);
@@ -70,6 +77,8 @@ const DeckView = ({ deck, onAdd, onRemove, setSearchTerm }) => {
           card={expandedCard}
           onClose={handleClose}
           setSearchTerm={setSearchTerm}
+          searchCards={searchCards}
+          filters={filters}
         />
       )}
     </div>

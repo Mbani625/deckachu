@@ -8,6 +8,7 @@ import { canAddCardToDeck } from "./utils/deckRules";
 import useCardSearch from "./hooks/useCardSearch";
 import FilterDropdown from "./components/FilterDropdown";
 import { formatDeckForExport } from "./utils/formatDeckForExport";
+import { importDeckFromTxt } from "./utils/importDeckFromTxt";
 
 function App() {
   const [deck, setDeck] = useState(() => {
@@ -96,6 +97,12 @@ function App() {
     a.download = "deck.txt";
     a.click();
     URL.revokeObjectURL(url);
+  };
+
+  const handleImportDeck = (event) => {
+    const file = event.target.files[0];
+    if (!file) return;
+    importDeckFromTxt(file, setDeck);
   };
 
   const handleSearch = () => {
@@ -366,6 +373,13 @@ function App() {
             Export
           </button>
 
+          <input
+            type="file"
+            accept=".txt"
+            onChange={handleImportDeck}
+            className="text-white text-sm my-2"
+          />
+
           <button
             onClick={toggleDeckView}
             className="flex top-2 z-20 px-3 py-1 rounded justify-center w-[90px] bg-blue-600 text-white hover:bg-blue-700"
@@ -379,6 +393,8 @@ function App() {
           onAdd={handleAddToDeck}
           onRemove={handleRemoveFromDeck}
           setSearchTerm={setSearchTerm}
+          searchCards={searchCards}
+          filters={activeFilters}
         />
       </div>
 
