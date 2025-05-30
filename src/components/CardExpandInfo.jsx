@@ -26,7 +26,7 @@ const CardExpandInfo = ({
   };
 
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center bg-black bg-opacity-70 overflow-y-auto">
+    <div className="fixed inset-0 bg-black bg-opacity-80 flex items-center justify-center z-[9999] p-4 overflow-y-auto">
       <div className="bg-gray-900 p-4 rounded-lg shadow-lg border border-gray-700 w-[350px] md:w-[450px] relative">
         <button
           onClick={onClose}
