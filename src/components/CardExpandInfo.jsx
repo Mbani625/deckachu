@@ -1,6 +1,12 @@
 import React from "react";
 
-const CardExpandInfo = ({ card, onClose, setSearchTerm }) => {
+const CardExpandInfo = ({
+  card,
+  onClose,
+  setSearchTerm,
+  searchCards,
+  filters,
+}) => {
   const handleEvolveSearch = (type) => {
     let nameToSearch = null;
 
@@ -9,13 +15,13 @@ const CardExpandInfo = ({ card, onClose, setSearchTerm }) => {
     }
 
     if (type === "evolvesTo" && card.evolvesTo && card.evolvesTo.length > 0) {
-      // Search for the first evolution — you could map this later if needed
-      nameToSearch = card.evolvesTo[0];
+      nameToSearch = card.evolvesTo[0]; // Optionally: map over all
     }
 
     if (!nameToSearch) return;
 
     setSearchTerm(nameToSearch);
+    searchCards(nameToSearch, filters); // trigger the actual search
     onClose();
   };
 
@@ -28,7 +34,6 @@ const CardExpandInfo = ({ card, onClose, setSearchTerm }) => {
         >
           ✕
         </button>
-
         <img
           src={card.images.large || card.images.small}
           alt={card.name}
@@ -45,7 +50,6 @@ const CardExpandInfo = ({ card, onClose, setSearchTerm }) => {
         {card.rarity && (
           <p className="text-sm text-yellow-300 mt-1">Rarity: {card.rarity}</p>
         )}
-
         <div className="mt-4 flex gap-2">
           {card.evolvesFrom && (
             <button
@@ -55,12 +59,14 @@ const CardExpandInfo = ({ card, onClose, setSearchTerm }) => {
               Evolves From: {card.evolvesFrom}
             </button>
           )}
-          <button
-            onClick={() => handleEvolveSearch("evolvesTo")}
-            className="text-xs bg-green-700 hover:bg-green-800 text-white px-3 py-1 rounded"
-          >
-            Show Evolves To: {card.evolvesTo}
-          </button>
+          {card.evolvesTo && card.evolvesTo.length > 0 && (
+            <button
+              onClick={() => handleEvolveSearch("evolvesTo")}
+              className="text-xs bg-green-700 hover:bg-green-800 text-white px-3 py-1 rounded"
+            >
+              Show Evolves To: {card.evolvesTo.join(", ")}
+            </button>
+          )}
         </div>
       </div>
     </div>

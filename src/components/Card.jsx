@@ -1,7 +1,7 @@
 import React, { useState } from "react";
 import CardExpandInfo from "./CardExpandInfo";
 
-const Card = ({ card, onAdd, setSearchTerm }) => {
+const Card = ({ card, onAdd, setSearchTerm, searchCards, filters }) => {
   const [expanded, setExpanded] = useState(false);
 
   return (
@@ -27,6 +27,8 @@ const Card = ({ card, onAdd, setSearchTerm }) => {
           card={card}
           onClose={() => setExpanded(false)}
           setSearchTerm={setSearchTerm}
+          searchCards={searchCards}
+          filters={filters}
         />
       )}
     </div>

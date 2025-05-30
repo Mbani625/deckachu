@@ -98,6 +98,8 @@ const useCardSearch = () => {
             subtypes: card.subtypes,
             types: card.types,
             images: card.images,
+            evolvesFrom: card.evolvesFrom || null,
+            evolvesTo: card.evolvesTo || [],
             number: card.number || "",
             set: {
               id: card.set?.id || "",

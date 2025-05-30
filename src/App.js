@@ -35,6 +35,17 @@ function App() {
   const scrollUpDistance = useRef(0);
   const SCROLL_UP_THRESHOLD = 100;
 
+  const activeFilters = useMemo(
+    () => ({
+      format,
+      cardType: typeFilter,
+      subType: subtypeFilter,
+      pokemonType: pokemonTypeFilter,
+      sort: sortOption,
+    }),
+    [format, typeFilter, subtypeFilter, pokemonTypeFilter, sortOption]
+  );
+
   useEffect(() => {
     const handleScroll = () => {
       const scrollTop = window.scrollY || document.documentElement.scrollTop;
@@ -306,6 +317,8 @@ function App() {
             onSearchSubmit={handleSearch}
             loadMore={loadMore}
             hasMore={page < 10}
+            searchCards={searchCards}
+            filters={activeFilters}
           />
         </div>
 
