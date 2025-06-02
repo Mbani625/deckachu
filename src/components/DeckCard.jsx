@@ -1,5 +1,8 @@
 import React, { useState } from "react";
 
+const isBasicEnergy = (card) =>
+  card.supertype === "Energy" && card.subtypes?.includes("Basic");
+
 const DeckCard = ({ card, count, onAdd, onRemove, onExpand }) => {
   const [pulse, setPulse] = useState("");
 
@@ -42,7 +45,7 @@ const DeckCard = ({ card, count, onAdd, onRemove, onExpand }) => {
         <button
           onClick={handleAdd}
           className="px-3 py-1 text-sm bg-green-600 hover:bg-green-700 rounded"
-          disabled={count >= 4}
+          disabled={!isBasicEnergy(card) && count >= 4} // ✅ Unlimited if basic energy
         >
           +1
         </button>

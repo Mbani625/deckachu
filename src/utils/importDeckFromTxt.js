@@ -1,3 +1,5 @@
+import { fetchAndCacheSets } from "./setCache";
+
 export const importDeckFromTxt = async (input, setDeck, isRawText = false) => {
   const text = isRawText ? input : await input.text();
   const lines = text
@@ -5,23 +7,9 @@ export const importDeckFromTxt = async (input, setDeck, isRawText = false) => {
     .map((line) => line.trim())
     .filter(Boolean);
 
-  let ptcgoToSetIdMap = {};
+  const setMap = await fetchAndCacheSets();
 
-  const loadSetMappings = async () => {
-    if (Object.keys(ptcgoToSetIdMap).length > 0) return;
-
-    const res = await fetch("https://api.pokemontcg.io/v2/sets");
-    const data = await res.json();
-    const sets = data.data || [];
-
-    sets.forEach((set) => {
-      if (set.ptcgoCode) {
-        ptcgoToSetIdMap[set.ptcgoCode] = set.id;
-      }
-    });
-  };
-
-  await loadSetMappings();
+  const ptcgoToSetIdMap = setMap.ptcgoToId;
 
   let currentSection = null;
   const deckEntries = [];
@@ -54,6 +42,8 @@ export const importDeckFromTxt = async (input, setDeck, isRawText = false) => {
     });
   }
 
+  const newDeck = {};
+
   for (const entry of deckEntries) {
     const setId = ptcgoToSetIdMap[entry.set];
     if (!setId) {
@@ -61,22 +51,18 @@ export const importDeckFromTxt = async (input, setDeck, isRawText = false) => {
       continue;
     }
 
-    const exactQuery = `set.id:${setId} number:${entry.number}`;
-    let card = null;
-
+    const query = `set.id:${setId} number:${entry.number}`;
     try {
       let res = await fetch(
-        `https://api.pokemontcg.io/v2/cards?q=${encodeURIComponent(exactQuery)}`
+        `https://api.pokemontcg.io/v2/cards?q=${encodeURIComponent(query)}`
       );
       let data = await res.json();
-      card = data.data?.[0];
+      let card = data.data?.[0];
 
       if (!card) {
-        const nameQuery = `set.id:${setId} name:"${entry.name}"`;
+        const fallback = `set.id:${setId} name:"${entry.name}"`;
         res = await fetch(
-          `https://api.pokemontcg.io/v2/cards?q=${encodeURIComponent(
-            nameQuery
-          )}`
+          `https://api.pokemontcg.io/v2/cards?q=${encodeURIComponent(fallback)}`
         );
         data = await res.json();
         card = data.data?.[0];
@@ -87,18 +73,29 @@ export const importDeckFromTxt = async (input, setDeck, isRawText = false) => {
         continue;
       }
 
-      setDeck((prev) => {
-        const existing = prev[card.id];
-        return {
-          ...prev,
-          [card.id]: {
-            card,
-            count: Math.min((existing?.count || 0) + entry.count, 4),
-          },
-        };
-      });
+      // Patch card to include proper info if missing
+      if (
+        card.supertype === "Energy" &&
+        (!card.subtypes || !card.subtypes.includes("Basic")) &&
+        entry.name.startsWith("Basic ")
+      ) {
+        card.subtypes = ["Basic"];
+      }
+
+      const existing = newDeck[card.id];
+      const totalCount = (existing?.count || 0) + entry.count;
+
+      const isBasic =
+        card.supertype === "Energy" && card.subtypes?.includes("Basic");
+
+      newDeck[card.id] = {
+        card,
+        count: isBasic ? totalCount : Math.min(totalCount, 4),
+      };
     } catch (err) {
       console.error(`Failed to fetch card: ${entry.name}`, err);
     }
   }
+
+  setDeck(newDeck);
 };

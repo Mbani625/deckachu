@@ -11,6 +11,7 @@ import { formatDeckForExport } from "./utils/formatDeckForExport";
 import { importDeckFromTxt } from "./utils/importDeckFromTxt";
 import DeckTextImportModal from "./components/DeckTextImportModal";
 import useScrollHeader from "./hooks/useScrollHeader";
+import { fetchAndCacheSets } from "./utils/setCache";
 
 function App() {
   const [deck, setDeck] = useState(() => {
@@ -34,6 +35,10 @@ function App() {
   const { showHeader, showBackToTop } = useScrollHeader(100, hasSearched);
   const [showTextImport, setShowTextImport] = useState(false);
   const [rawDeckText, setRawDeckText] = useState("");
+
+  useEffect(() => {
+    fetchAndCacheSets(); // just load it and cache
+  }, []);
 
   const activeFilters = useMemo(
     () => ({
@@ -137,17 +142,20 @@ function App() {
   }, [deck]);
 
   const handleAddToDeck = (card) => {
-    if (!canAddCardToDeck(deck, card)) return;
+    setDeck((prevDeck) => {
+      const existing = prevDeck[card.id];
+      const currentCount = existing ? existing.count : 0;
 
-    console.log("ADDING CARD TO DECK:", card);
+      const isBasic =
+        card.supertype === "Energy" && card.subtypes?.includes("Basic");
 
-    setDeck((prev) => {
-      const existing = prev[card.id];
+      if (!isBasic && !canAddCardToDeck(card, currentCount)) return prevDeck;
+
       return {
-        ...prev,
+        ...prevDeck,
         [card.id]: {
           card,
-          count: existing ? existing.count + 1 : 1,
+          count: currentCount + 1,
         },
       };
     });

@@ -1,38 +1,15 @@
+import { fetchAndCacheSets } from "./setCache";
+
 export async function formatDeckForExport(deck) {
   if (!Array.isArray(deck)) return "";
 
-  const sections = {
-    Pokémon: [],
-    Trainer: [],
-    Energy: [],
-  };
+  const setMap = await fetchAndCacheSets();
 
+  const sections = { Pokémon: [], Trainer: [], Energy: [] };
   let total = 0;
 
-  // Cache set ID → ptcgoCode
-  const setMap = {};
-
-  const fetchSetPtgcoCode = async (setId) => {
-    if (setMap[setId]) return setMap[setId];
-    try {
-      const res = await fetch(`https://api.pokemontcg.io/v2/sets/${setId}`);
-      const data = await res.json();
-      const ptcgoCode = data?.data?.ptcgoCode || setId;
-      setMap[setId] = ptcgoCode;
-      return ptcgoCode;
-    } catch {
-      return setId;
-    }
-  };
-
   for (const { card, count } of deck) {
-    let ptcgoCode = card.set?.ptcgoCode || "?";
-
-    // If it's missing or placeholder, try to fetch it
-    if (ptcgoCode === "?" && card.set?.id) {
-      ptcgoCode = await fetchSetPtgcoCode(card.set.id);
-    }
-
+    const ptcgoCode = setMap.idToPtcgo[card.set.id] || "?";
     const line = `${count} ${card.name} ${ptcgoCode} ${card.number}`;
 
     if (card.supertype === "Pokémon") {
