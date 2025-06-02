@@ -21,6 +21,7 @@ export const isBasicEnergy = (card) => {
 
 // Normalize names by removing parentheses and trimming spaces
 const normalizeName = (name) => {
+  if (typeof name !== "string") return "";
   return name
     .replace(/\s*\(.*?\)\s*/g, "")
     .trim()
@@ -28,25 +29,26 @@ const normalizeName = (name) => {
 };
 
 const getComparisonKey = (card) => {
-  const baseName = normalizeName(card.name);
-  const firstAttack = card.attacks?.[0]?.name || "";
+  const baseName = normalizeName(card?.name);
+  const firstAttack = card?.attacks?.[0]?.name || "";
   return `${baseName}::${firstAttack.toLowerCase()}`;
 };
 
-// Get count of all cards in the deck matching normalized name
 export const getCardNameCount = (deck, cardName, referenceCard = null) => {
   const referenceKey = referenceCard
     ? getComparisonKey(referenceCard)
     : normalizeName(cardName);
 
   return Object.values(deck)
-    .filter(({ card }) => {
+    .filter((entry) => {
+      const card = entry?.card;
+      if (!card) return false; // skip broken entries
       if (referenceCard) {
         return getComparisonKey(card) === referenceKey;
       }
       return normalizeName(card.name) === referenceKey;
     })
-    .reduce((sum, { count }) => sum + count, 0);
+    .reduce((sum, entry) => sum + (entry?.count || 0), 0);
 };
 
 export const canAddCardToDeck = (deck, card) => {

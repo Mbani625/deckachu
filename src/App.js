@@ -15,9 +15,16 @@ import { fetchAndCacheSets } from "./utils/setCache";
 
 function App() {
   const [deck, setDeck] = useState(() => {
-    const saved = localStorage.getItem("deckachu_deck");
-    return saved ? JSON.parse(saved) : [];
+    try {
+      const saved = JSON.parse(localStorage.getItem("deckachu_deck"));
+      return saved && typeof saved === "object" && !Array.isArray(saved)
+        ? saved
+        : {};
+    } catch {
+      return {};
+    }
   });
+
   const [isDeckExpanded, setIsDeckExpanded] = useState(false);
   const toggleDeckView = () => {
     setIsDeckExpanded((prev) => !prev);
@@ -140,6 +147,33 @@ function App() {
   useEffect(() => {
     localStorage.setItem("deckachu_deck", JSON.stringify(deck));
   }, [deck]);
+
+  const saveDeckByName = (name) => {
+    const allDecks = JSON.parse(
+      localStorage.getItem("deckachu_savedDecks") || "{}"
+    );
+    allDecks[name] = deck;
+    localStorage.setItem("deckachu_savedDecks", JSON.stringify(allDecks));
+    alert(`Deck '${name}' saved!`);
+  };
+
+  const loadDeckByName = (name) => {
+    const allDecks = JSON.parse(
+      localStorage.getItem("deckachu_savedDecks") || "{}"
+    );
+    if (allDecks[name]) {
+      setDeck(allDecks[name]);
+      alert(`Deck '${name}' loaded!`);
+    } else {
+      alert(`Deck '${name}' not found.`);
+    }
+  };
+
+  const listSavedDecks = () => {
+    return Object.keys(
+      JSON.parse(localStorage.getItem("deckachu_savedDecks") || "{}")
+    );
+  };
 
   const handleAddToDeck = (card) => {
     setDeck((prevDeck) => {
@@ -366,6 +400,29 @@ function App() {
 
             <button
               onClick={() => {
+                const name = prompt("Enter a name to save your deck:");
+                if (name) saveDeckByName(name);
+              }}
+              className="bg-indigo-600 hover:bg-indigo-700 text-white font-semibold px-3 py-1 rounded"
+            >
+              Save Deck
+            </button>
+
+            <button
+              onClick={() => {
+                const savedNames = listSavedDecks();
+                const name = prompt(
+                  `Enter name to load from:\n${savedNames.join("\n")}`
+                );
+                if (name) loadDeckByName(name);
+              }}
+              className="bg-teal-600 hover:bg-teal-700 text-white font-semibold px-3 py-1 rounded"
+            >
+              Load Deck
+            </button>
+
+            <button
+              onClick={() => {
                 if (
                   window.confirm(
                     "Are you sure you want to clear your entire deck?"
@@ -426,6 +483,31 @@ function App() {
                   className="block w-full px-4 py-2 hover:bg-gray-800"
                 >
                   {isDeckExpanded ? "Collapse Deck" : "Expand Deck"}
+                </button>
+
+                <button
+                  onClick={() => {
+                    const name = prompt("Enter a name to save your deck:");
+                    if (name) saveDeckByName(name);
+                    setShowOptionsMenu(false);
+                  }}
+                  className="block w-full px-4 py-2 hover:bg-gray-800"
+                >
+                  Save Deck
+                </button>
+
+                <button
+                  onClick={() => {
+                    const savedNames = listSavedDecks();
+                    const name = prompt(
+                      `Enter name to load from:\n${savedNames.join("\n")}`
+                    );
+                    if (name) loadDeckByName(name);
+                    setShowOptionsMenu(false);
+                  }}
+                  className="block w-full px-4 py-2 hover:bg-gray-800"
+                >
+                  Load Deck
                 </button>
 
                 <button
