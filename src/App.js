@@ -148,6 +148,26 @@ function App() {
     localStorage.setItem("deckachu_deck", JSON.stringify(deck));
   }, [deck]);
 
+  const [currentDeckName, setCurrentDeckName] = useState(null);
+
+  const saveDeck = () => {
+    if (!currentDeckName) {
+      const name = prompt("Enter name for your deck:");
+      if (!name) return;
+      setCurrentDeckName(name);
+      saveDeckByName(name);
+    } else {
+      saveDeckByName(currentDeckName);
+    }
+  };
+
+  const saveDeckAs = () => {
+    const name = prompt("Save deck as:");
+    if (!name) return;
+    setCurrentDeckName(name);
+    saveDeckByName(name);
+  };
+
   const saveDeckByName = (name) => {
     const allDecks = JSON.parse(
       localStorage.getItem("deckachu_savedDecks") || "{}"
@@ -399,13 +419,17 @@ function App() {
             </button>
 
             <button
-              onClick={() => {
-                const name = prompt("Enter a name to save your deck:");
-                if (name) saveDeckByName(name);
-              }}
+              onClick={saveDeck}
               className="bg-indigo-600 hover:bg-indigo-700 text-white font-semibold px-3 py-1 rounded"
             >
-              Save Deck
+              Save
+            </button>
+
+            <button
+              onClick={saveDeckAs}
+              className="bg-blue-700 hover:bg-blue-800 text-white font-semibold px-3 py-1 rounded"
+            >
+              Save As
             </button>
 
             <button
@@ -414,11 +438,14 @@ function App() {
                 const name = prompt(
                   `Enter name to load from:\n${savedNames.join("\n")}`
                 );
-                if (name) loadDeckByName(name);
+                if (name) {
+                  loadDeckByName(name);
+                  setCurrentDeckName(name); // 🔄 set loaded deck name
+                }
               }}
               className="bg-teal-600 hover:bg-teal-700 text-white font-semibold px-3 py-1 rounded"
             >
-              Load Deck
+              Load
             </button>
 
             <button
@@ -450,6 +477,15 @@ function App() {
               <div className="mt-2 bg-gray-900 rounded-lg shadow-lg z-50 border border-gray-700 w-full text-left">
                 <button
                   onClick={() => {
+                    toggleDeckView();
+                    setShowOptionsMenu(false);
+                  }}
+                  className="block w-full px-4 py-2 hover:bg-gray-800"
+                >
+                  {isDeckExpanded ? "Collapse Deck" : "Expand Deck"}
+                </button>
+                <button
+                  onClick={() => {
                     document.getElementById("deck-file-input").click();
                     setShowOptionsMenu(false);
                   }}
@@ -475,25 +511,25 @@ function App() {
                 >
                   Export Deck
                 </button>
+
                 <button
                   onClick={() => {
-                    toggleDeckView();
+                    saveDeck();
                     setShowOptionsMenu(false);
                   }}
                   className="block w-full px-4 py-2 hover:bg-gray-800"
                 >
-                  {isDeckExpanded ? "Collapse Deck" : "Expand Deck"}
+                  Save
                 </button>
 
                 <button
                   onClick={() => {
-                    const name = prompt("Enter a name to save your deck:");
-                    if (name) saveDeckByName(name);
+                    saveDeckAs();
                     setShowOptionsMenu(false);
                   }}
                   className="block w-full px-4 py-2 hover:bg-gray-800"
                 >
-                  Save Deck
+                  Save As
                 </button>
 
                 <button
@@ -502,12 +538,15 @@ function App() {
                     const name = prompt(
                       `Enter name to load from:\n${savedNames.join("\n")}`
                     );
-                    if (name) loadDeckByName(name);
+                    if (name) {
+                      loadDeckByName(name);
+                      setCurrentDeckName(name);
+                    }
                     setShowOptionsMenu(false);
                   }}
                   className="block w-full px-4 py-2 hover:bg-gray-800"
                 >
-                  Load Deck
+                  Load
                 </button>
 
                 <button
