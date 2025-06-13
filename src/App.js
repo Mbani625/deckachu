@@ -427,7 +427,7 @@ function App() {
               onClick={() => setShowTextImport(true)}
               className="bg-purple-600 hover:bg-purple-700 text-white font-semibold px-3 py-1 rounded"
             >
-              Paste Deck Text
+              Import Text
             </button>
 
             <button
@@ -519,7 +519,7 @@ function App() {
                   }}
                   className="block w-full px-4 py-2 hover:bg-gray-800"
                 >
-                  Paste Deck Text
+                  Import Text
                 </button>
                 <button
                   onClick={() => {
