@@ -250,7 +250,7 @@ function App() {
             <h1 className="text-2xl sm:text-3xl font-bold mb-3 text-white text-center">
               Deckachu
             </h1>
-            <div className="text-center mt-1">
+            <div className="text-center my-2">
               <a
                 href="https://discord.com/oauth2/authorize?client_id=1383073892431691888&permissions=274877974528&integration_type=0&scope=bot"
                 target="_blank"
