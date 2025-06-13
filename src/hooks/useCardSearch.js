@@ -1,4 +1,5 @@
 import { useState, useRef } from "react";
+import { fetchAndCacheSets, getCachedSet } from "../utils/setCache"; // adjust path as needed
 
 const cardSearchCache = {};
 
@@ -11,14 +12,8 @@ const useCardSearch = () => {
   const lastSearchParams = useRef({ query: "", filters: {} });
 
   const searchCards = async (query = "", filters = {}) => {
+    const searchTerm = query.trim().toLowerCase();
     const q = [];
-
-    if (query.trim()) {
-      const quotedQuery = query.includes(" ")
-        ? `"${query.trim()}"`
-        : query.trim();
-      q.push(`name:${quotedQuery}`);
-    }
 
     const lowerQuery = query.toLowerCase();
     const isBasicEnergySearch =
@@ -27,6 +22,7 @@ const useCardSearch = () => {
         lowerQuery.includes("basic")) &&
       (filters.cardType === "Energy" || filters.cardType === "All");
 
+    // Base filter: only by format/cardType/subtype/type
     if (filters.format === "standard" && !isBasicEnergySearch) {
       q.push(
         '(regulationMark:"G" OR regulationMark:"H" OR regulationMark:"I" OR regulationMark:"J")'
@@ -45,51 +41,45 @@ const useCardSearch = () => {
       q.push(`types:${filters.pokemonType}`);
     }
 
-    if (q.length === 0) {
-      setResults([]);
-      setAllResults([]);
-      return;
-    }
-
     const fullQuery = q.join(" ");
-    const cacheKey = `${fullQuery}`;
+    const cacheKey = JSON.stringify({ filters });
 
     setIsLoading(true);
     setError(null);
     setPage(1);
     lastSearchParams.current = { query, filters };
 
-    if (cardSearchCache[cacheKey]) {
-      applySortAndPaginate(cardSearchCache[cacheKey], filters, 1);
-      return;
-    }
-
     try {
-      const res = await fetch(
-        `https://api.pokemontcg.io/v2/cards?q=${encodeURIComponent(fullQuery)}`
-      );
-      const data = await res.json();
-      const allData = data?.data || [];
+      let rawCards = [];
 
-      const fetchSetPtgcoCode = async (setId) => {
-        try {
-          const setRes = await fetch(
-            `https://api.pokemontcg.io/v2/sets/${setId}`
-          );
-          const setData = await setRes.json();
-          return setData?.data?.ptcgoCode || "?";
-        } catch {
-          return "?";
+      if (cardSearchCache[cacheKey]) {
+        rawCards = cardSearchCache[cacheKey];
+      } else {
+        let page = 1;
+        let more = true;
+
+        while (more) {
+          const url = `https://api.pokemontcg.io/v2/cards?q=${encodeURIComponent(
+            fullQuery
+          )}&page=${page}&pageSize=250`;
+          const res = await fetch(url);
+          const data = await res.json();
+          const batch = data?.data || [];
+
+          rawCards.push(...batch);
+
+          more = batch.length === 250;
+          page++;
         }
-      };
+
+        cardSearchCache[cacheKey] = rawCards;
+      }
+
+      await fetchAndCacheSets();
 
       const mappedCards = await Promise.all(
-        allData.map(async (card) => {
-          let ptcgoCode = card.set?.ptcgoCode || "?";
-
-          if (ptcgoCode === "?" && card.set?.id) {
-            ptcgoCode = await fetchSetPtgcoCode(card.set.id);
-          }
+        rawCards.map(async (card) => {
+          const ptcgoCode = getCachedSet(card.set?.id) || "?";
 
           return {
             id: card.id,
@@ -101,6 +91,9 @@ const useCardSearch = () => {
             evolvesFrom: card.evolvesFrom || null,
             evolvesTo: card.evolvesTo || [],
             number: card.number || "",
+            rules: card.rules || [],
+            abilities: card.abilities || [],
+            attacks: card.attacks || [],
             set: {
               id: card.set?.id || "",
               ptcgoCode,
@@ -111,14 +104,31 @@ const useCardSearch = () => {
         })
       );
 
-      cardSearchCache[cacheKey] = mappedCards;
-      applySortAndPaginate(mappedCards, filters, 1);
+      // ✅ Apply search term matching on all fields here
+      const filteredCards = filterCardsBySearchTerm(mappedCards, searchTerm);
+      applySortAndPaginate(filteredCards, filters, 1);
     } catch (err) {
       console.error(err);
       setError("Search failed.");
     } finally {
       setIsLoading(false);
     }
+  };
+
+  const filterCardsBySearchTerm = (cards, searchTerm) => {
+    if (!searchTerm) return cards;
+
+    return cards.filter((card) => {
+      const textMatch = [
+        ...(card.rules || []),
+        ...(card.attacks || []).map((a) => a.text || ""),
+        ...(card.abilities || []).map((a) => a.text || ""),
+      ].some((text) => text.toLowerCase().includes(searchTerm));
+
+      const nameMatch = card.name.toLowerCase().includes(searchTerm);
+
+      return nameMatch || textMatch;
+    });
   };
 
   const applySortAndPaginate = (cards, filters, pageNum) => {

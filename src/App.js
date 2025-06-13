@@ -36,7 +36,8 @@ function App() {
   const [subtypeFilter, setSubtypeFilter] = useState("");
   const [pokemonTypeFilter, setPokemonTypeFilter] = useState("");
   const [sortOption, setSortOption] = useState("");
-  const { results, searchCards, loadMore, page, allResults } = useCardSearch();
+  const { results, searchCards, loadMore, page, allResults, isLoading } =
+    useCardSearch();
   const [hasSearched, setHasSearched] = useState(false);
   const [showOptionsMenu, setShowOptionsMenu] = useState(false);
   const { showHeader, showBackToTop } = useScrollHeader(100, hasSearched);
@@ -345,16 +346,23 @@ function App() {
         </div>
 
         <div className="flex-grow overflow-y-auto md:mt-[0px] mt-[100px] p-4 pt-0">
-          <CardGrid
-            cards={sortedResults}
-            onAdd={handleAddToDeck}
-            setSearchTerm={setSearchTerm}
-            onSearchSubmit={handleSearch}
-            loadMore={loadMore}
-            hasMore={page < 10}
-            searchCards={searchCards}
-            filters={activeFilters}
-          />
+          {isLoading ? (
+            <div className="flex flex-col justify-center items-center py-20">
+              <div className="animate-spin rounded-full h-12 w-12 border-t-4 border-blue-500 border-4 mb-4"></div>
+              <p className="text-white text-sm">Searching cards...</p>
+            </div>
+          ) : (
+            <CardGrid
+              cards={sortedResults}
+              onAdd={handleAddToDeck}
+              setSearchTerm={setSearchTerm}
+              onSearchSubmit={handleSearch}
+              loadMore={loadMore}
+              hasMore={page < 10}
+              searchCards={searchCards}
+              filters={activeFilters}
+            />
+          )}
         </div>
 
         {results.length > 0 && (
