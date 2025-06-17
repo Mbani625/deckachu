@@ -26,3 +26,5 @@ yarn-error.log*
 # Ignore Firebase config
 src/firebaseConfig.js
 
+.env
+
