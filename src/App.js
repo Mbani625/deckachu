@@ -381,7 +381,7 @@ function App() {
                   onClick={() => setShowFilters((prev) => !prev)}
                   className="ml-2 px-3 py-1.5 rounded bg-gray-700 text-white text-sm hover:bg-gray-600"
                 >
-                  {showFilters ? "▲ Collapse Filters" : "▼ Show Filters"}
+                  {showFilters ? "▲ Collapse" : "▼ Show"}
                 </button>
               </div>
             </div>
