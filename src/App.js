@@ -10,7 +10,7 @@ import FilterDropdown from "./components/FilterDropdown";
 import { formatDeckForExport } from "./utils/formatDeckForExport";
 import { importDeckFromTxt } from "./utils/importDeckFromTxt";
 import DeckTextImportModal from "./components/DeckTextImportModal";
-import useScrollHeader from "./hooks/useScrollHeader";
+//import useScrollHeader from "./hooks/useScrollHeader";
 import { fetchAndCacheSets } from "./utils/setCache";
 import { login, logout, onAuthChange } from "./auth";
 import Header from "./components/Header";
@@ -49,12 +49,11 @@ function App() {
   const [sortOption, setSortOption] = useState("");
   const { results, searchCards, loadMore, page, allResults, isLoading } =
     useCardSearch();
-  const [hasSearched, setHasSearched] = useState(false);
   const [showOptionsMenu, setShowOptionsMenu] = useState(false);
-  const { showHeader, showBackToTop } = useScrollHeader(100, hasSearched);
   const [showTextImport, setShowTextImport] = useState(false);
   const [rawDeckText, setRawDeckText] = useState("");
   const [showLogin, setShowLogin] = useState(false); // ✅ add this
+  const [showFilters, setShowFilters] = useState(true);
 
   const handleLogin = async (email, password) => {
     try {
@@ -152,7 +151,6 @@ function App() {
         false
       );
     }
-    setHasSearched(true);
   };
 
   const sortedResults = useMemo(() => {
@@ -277,20 +275,14 @@ function App() {
           onSignup={handleSignup}
         />
       )}
-
       <div className="p-4 pt-[200px]">
-        <div
-          className={`transition-transform duration-300 ease-in-out fixed top-0 left-0 right-0 z-20 bg-gray-900 shadow-md ${
-            showHeader ? "translate-y-0" : "-translate-y-full"
-          }`}
-        >
+        <div className="fixed top-0 left-0 right-0 z-20 bg-gray-900 shadow-md">
           <div className="p-3">
             <Header
               user={user}
-              showHeader={showHeader}
               login={login}
               logout={logout}
-              onShowLogin={() => setShowLogin(true)} // ✅ new prop
+              onShowLogin={() => setShowLogin(true)}
             />
 
             <div className="flex flex-col sm:flex-row flex-wrap items-stretch sm:items-center gap-2">
@@ -314,67 +306,68 @@ function App() {
               {/* horizontal on mobile */}
               {/* Uniform-width filter dropdowns */}
               <div className="flex flex-wrap items-center gap-2">
-                <FilterDropdown
-                  label="Format"
-                  value={format}
-                  onChange={setFormat}
-                  options={["standard", "expanded", "unlimited"]}
-                  className="w-[180px]"
-                />
-
-                <FilterDropdown
-                  label="Card Type"
-                  value={typeFilter}
-                  onChange={setTypeFilter}
-                  options={["Pokémon", "Trainer", "Energy"]}
-                  className="w-[180px]"
-                />
-
-                <FilterDropdown
-                  label="Pokémon Type"
-                  value={pokemonTypeFilter}
-                  onChange={setPokemonTypeFilter}
-                  options={[
-                    "Colorless",
-                    "Darkness",
-                    "Dragon",
-                    "Fairy",
-                    "Fighting",
-                    "Fire",
-                    "Grass",
-                    "Lightning",
-                    "Metal",
-                    "Psychic",
-                    "Water",
-                  ]}
-                  className="w-[180px]"
-                />
-
-                <FilterDropdown
-                  label="Subtype"
-                  value={subtypeFilter}
-                  onChange={setSubtypeFilter}
-                  options={[
-                    "Stage 1",
-                    "Stage 2",
-                    "Basic",
-                    "EX",
-                    "V",
-                    "VSTAR",
-                    "V-UNION",
-                    "BREAK",
-                    "Item",
-                    "Supporter",
-                    "Stadium",
-                    "ACE SPEC",
-                    "Pokémon Tool",
-                    "Special Energy",
-                    "Technical Machine",
-                    "Ancient",
-                    "Fossil",
-                  ]}
-                  className="w-[180px]"
-                />
+                {showFilters && (
+                  <>
+                    <FilterDropdown
+                      label="Format"
+                      value={format}
+                      onChange={setFormat}
+                      options={["standard", "expanded", "unlimited"]}
+                      className="w-[180px]"
+                    />
+                    <FilterDropdown
+                      label="Card Type"
+                      value={typeFilter}
+                      onChange={setTypeFilter}
+                      options={["Pokémon", "Trainer", "Energy"]}
+                      className="w-[180px]"
+                    />
+                    <FilterDropdown
+                      label="Pokémon Type"
+                      value={pokemonTypeFilter}
+                      onChange={setPokemonTypeFilter}
+                      options={[
+                        "Colorless",
+                        "Darkness",
+                        "Dragon",
+                        "Fairy",
+                        "Fighting",
+                        "Fire",
+                        "Grass",
+                        "Lightning",
+                        "Metal",
+                        "Psychic",
+                        "Water",
+                      ]}
+                      className="w-[180px]"
+                    />
+                    <FilterDropdown
+                      label="Subtype"
+                      value={subtypeFilter}
+                      onChange={setSubtypeFilter}
+                      options={[
+                        "Stage 1",
+                        "Stage 2",
+                        "Basic",
+                        "EX",
+                        "V",
+                        "VSTAR",
+                        "V-UNION",
+                        "BREAK",
+                        "Item",
+                        "Supporter",
+                        "Stadium",
+                        "ACE SPEC",
+                        "Pokémon Tool",
+                        "Special Energy",
+                        "Technical Machine",
+                        "Ancient",
+                        "Fossil",
+                      ]}
+                      className="w-[180px]"
+                    />
+                  </>
+                )}
 
                 <FilterDropdown
                   label="Sort By"
@@ -383,6 +376,13 @@ function App() {
                   options={["A-Z", "Z-A", "Pokémon Type"]}
                   className="w-[180px]"
                 />
+
+                <button
+                  onClick={() => setShowFilters((prev) => !prev)}
+                  className="ml-2 px-3 py-1.5 rounded bg-gray-700 text-white text-sm hover:bg-gray-600"
+                >
+                  {showFilters ? "▲ Collapse Filters" : "▼ Show Filters"}
+                </button>
               </div>
             </div>
           </div>
@@ -419,7 +419,6 @@ function App() {
           </div>
         )}
       </div>
-
       {/* Fixed deck view at bottom */}
       <div
         className={`fixed left-0 right-0 p-4 bg-gray-950 border-t border-gray-800 transition-all duration-300 overflow-y-auto ${
@@ -631,15 +630,6 @@ function App() {
         />
       </div>
 
-      {showBackToTop && (
-        <button
-          onClick={() => window.scrollTo({ top: 0, behavior: "smooth" })}
-          className="fixed bottom-5 right-5 z-30 bg-gray-700 hover:bg-gray-600 text-white p-2 rounded-full shadow-md text-lg opacity-70 hover:opacity-100 transition"
-          title="Back to Top"
-        >
-          ↑
-        </button>
-      )}
       {/* DECK TEXT MODAL */}
       {showTextImport && (
         <DeckTextImportModal
