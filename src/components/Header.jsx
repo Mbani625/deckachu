@@ -3,7 +3,7 @@ import { logout } from "../auth";
 
 export default function Header({ user, onShowLogin }) {
   return (
-    <div className="flex flex-col items-center justify-between bg-gray-900 text-white p-4 sm:flex-row sm:items-center sm:gap-4">
+    <div className="flex items-center justify-between bg-gray-900 text-white px-3 pb-2 sm:flex-row sm:items-center sm:gap-4">
       <h1 className="text-2xl font-bold tracking-wide">Deckachu</h1>
 
       <a
@@ -12,7 +12,7 @@ export default function Header({ user, onShowLogin }) {
         rel="noopener noreferrer"
         className="bg-indigo-600 hover:bg-indigo-700 text-white font-semibold px-3 py-1.5 rounded text-sm mt-2 sm:mt-0"
       >
-        ➕ Add Bot to Discord
+        Discord Bot
       </a>
 
       <div className="mt-2 sm:mt-0">

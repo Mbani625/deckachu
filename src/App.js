@@ -379,7 +379,7 @@ function App() {
 
                 <button
                   onClick={() => setShowFilters((prev) => !prev)}
-                  className="ml-2 px-3 py-1.5 rounded bg-gray-700 text-white text-sm hover:bg-gray-600"
+                  className="ml-2 px-3 py-1.5 self-end rounded bg-gray-700 text-white text-sm hover:bg-gray-600"
                 >
                   {showFilters ? "▲ Collapse" : "▼ Show"}
                 </button>
