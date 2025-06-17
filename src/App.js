@@ -12,8 +12,19 @@ import { importDeckFromTxt } from "./utils/importDeckFromTxt";
 import DeckTextImportModal from "./components/DeckTextImportModal";
 import useScrollHeader from "./hooks/useScrollHeader";
 import { fetchAndCacheSets } from "./utils/setCache";
+import { login, logout, onAuthChange } from "./auth";
+import Header from "./components/Header";
+import LoginModal from "./components/LoginModal";
+import { login as loginWithEmail, register as signupWithEmail } from "./auth";
 
 function App() {
+  const [user, setUser] = useState(null);
+
+  useEffect(() => {
+    const unsubscribe = onAuthChange(setUser);
+    return () => unsubscribe();
+  }, []);
+
   const [deck, setDeck] = useState(() => {
     try {
       const saved = JSON.parse(localStorage.getItem("deckachu_deck"));
@@ -43,6 +54,25 @@ function App() {
   const { showHeader, showBackToTop } = useScrollHeader(100, hasSearched);
   const [showTextImport, setShowTextImport] = useState(false);
   const [rawDeckText, setRawDeckText] = useState("");
+  const [showLogin, setShowLogin] = useState(false); // ✅ add this
+
+  const handleLogin = async (email, password) => {
+    try {
+      await loginWithEmail(email, password);
+      setShowLogin(false);
+    } catch (error) {
+      console.error("Login failed:", error.message);
+    }
+  };
+
+  const handleSignup = async (email, password) => {
+    try {
+      await signupWithEmail(email, password);
+      setShowLogin(false);
+    } catch (error) {
+      console.error("Signup failed:", error.message);
+    }
+  };
 
   useEffect(() => {
     fetchAndCacheSets(); // just load it and cache
@@ -240,6 +270,14 @@ function App() {
   return (
     <div className="bg-gray-900 text-white min-h-screen">
       {/* Scrollable main content */}
+      {showLogin && (
+        <LoginModal
+          onClose={() => setShowLogin(false)}
+          onLogin={handleLogin}
+          onSignup={handleSignup}
+        />
+      )}
+
       <div className="p-4 pt-[200px]">
         <div
           className={`transition-transform duration-300 ease-in-out fixed top-0 left-0 right-0 z-20 bg-gray-900 shadow-md ${
@@ -247,19 +285,13 @@ function App() {
           }`}
         >
           <div className="p-3">
-            <h1 className="text-2xl sm:text-3xl font-bold mb-3 text-white text-center">
-              Deckachu
-            </h1>
-            <div className="text-center my-2">
-              <a
-                href="https://discord.com/oauth2/authorize?client_id=1383073892431691888&permissions=274877974528&integration_type=0&scope=bot"
-                target="_blank"
-                rel="noopener noreferrer"
-                className="inline-block bg-indigo-600 hover:bg-indigo-700 text-white font-semibold px-3 py-1.5 rounded text-sm"
-              >
-                ➕ Add Deckachu Bot to Discord
-              </a>
-            </div>
+            <Header
+              user={user}
+              showHeader={showHeader}
+              login={login}
+              logout={logout}
+              onShowLogin={() => setShowLogin(true)} // ✅ new prop
+            />
 
             <div className="flex flex-col sm:flex-row flex-wrap items-stretch sm:items-center gap-2">
               {/* Vertically aligned search section */}
