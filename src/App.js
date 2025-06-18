@@ -1,12 +1,10 @@
 // src/App.js
 import React, { useState, useEffect, useMemo } from "react";
-
 import SearchBar from "./components/SearchBar";
 import CardGrid from "./components/CardGrid";
 import DeckView from "./components/DeckView";
 import { canAddCardToDeck } from "./utils/deckRules";
 import useCardSearch from "./hooks/useCardSearch";
-import FilterDropdown from "./components/FilterDropdown";
 import { formatDeckForExport } from "./utils/formatDeckForExport";
 import { importDeckFromTxt } from "./utils/importDeckFromTxt";
 import DeckTextImportModal from "./components/DeckTextImportModal";
@@ -14,7 +12,6 @@ import { fetchAndCacheSets } from "./utils/setCache";
 import { login, logout, onAuthChange } from "./auth";
 import Header from "./components/Header";
 import LoginModal from "./components/LoginModal";
-import { login as loginWithEmail, register as signupWithEmail } from "./auth";
 import FilterBar from "./components/FilterBar";
 
 function App() {
@@ -51,7 +48,6 @@ function App() {
   const [showFilters, setShowFilters] = useState(true);
   const [dropUp, setDropUp] = useState(false);
   const optionsButtonRef = React.useRef(null);
-  const [showUserMenu, setShowUserMenu] = useState(false);
   const [windowWidth, setWindowWidth] = useState(window.innerWidth);
 
   const activeFilters = useMemo(
@@ -282,7 +278,7 @@ function App() {
             />
 
             <div className="flex flex-col sm:flex-row flex-wrap items-stretch sm:items-center gap-2">
-              {/* Vertically aligned search section */}
+              {/* Search section */}
               <div className="flex flex-col sm:flex-row items-stretch sm:items-center gap-2 w-full">
                 <div className="flex w-full items-stretch gap-2">
                   <SearchBar
@@ -305,8 +301,8 @@ function App() {
                   </button>
                 </div>
               </div>
+              {/* horizontal divider */}
               <div className="block h-px w-full bg-gray-700 my-2"></div>{" "}
-              {/* horizontal on mobile */}
               {/* Uniform-width filter dropdowns */}
               <div className="flex flex-wrap items-center gap-2">
                 <FilterBar
@@ -369,18 +365,19 @@ function App() {
             : "bottom-0 z-[30] h-[10vh] sm:h-[20vh] md:h-[20vh]"
         }`}
       >
-        {/* MOBILE OPTIONS MENU */}
-        <div className="md:hidden w-full text-center relative z-[9999] mb-2">
+        {/* ALWAYS-VISIBLE OPTIONS MENU */}
+        <div className="w-full flex justify-end pr-4 sm:pr-6 relative z-[40] mb-2">
           <button
             ref={optionsButtonRef}
             onClick={() => setShowOptionsMenu((prev) => !prev)}
-            className="bg-gray-700 hover:bg-gray-600 text-white font-semibold px-4 py-2 rounded w-full"
+            className="relative z-[50] bg-gray-700 hover:bg-gray-600 text-white font-semibold px-4 py-2 rounded"
           >
             ⚙ Options
           </button>
+
           {showOptionsMenu && (
             <div
-              className={`absolute z-[9999] border border-gray-700 w-full text-left bg-gray-900 rounded-lg shadow-lg ${
+              className={`absolute z-[9999] border border-gray-700 w-full md:w-64 text-left bg-gray-900 rounded-lg shadow-lg ${
                 dropUp ? "bottom-full mb-2" : "top-full mt-2"
               }`}
             >
@@ -484,83 +481,6 @@ function App() {
             className="hidden"
             onChange={handleImportDeck}
           />
-
-          {/* DESKTOP BUTTON GROUP */}
-          <div className="hidden md:flex gap-2">
-            <button
-              onClick={toggleDeckView}
-              className="bg-yellow-600 hover:bg-yellow-700 text-white font-semibold px-3 py-1 rounded"
-            >
-              {isDeckExpanded ? "Collapse Deck" : "Expand Deck"}
-            </button>
-
-            <button
-              onClick={() => document.getElementById("deck-file-input").click()}
-              className="bg-blue-600 hover:bg-blue-700 text-white font-semibold px-3 py-1 rounded"
-            >
-              Import File
-            </button>
-
-            <button
-              onClick={() => setShowTextImport(true)}
-              className="bg-purple-600 hover:bg-purple-700 text-white font-semibold px-3 py-1 rounded"
-            >
-              Import Text
-            </button>
-
-            <button
-              onClick={handleExportDeck}
-              className="bg-green-600 hover:bg-green-700 text-white font-semibold px-3 py-1 rounded"
-            >
-              Export
-            </button>
-
-            <button
-              onClick={saveDeck}
-              className="bg-indigo-600 hover:bg-indigo-700 text-white font-semibold px-3 py-1 rounded"
-            >
-              Save
-            </button>
-
-            <button
-              onClick={saveDeckAs}
-              className="bg-blue-700 hover:bg-blue-800 text-white font-semibold px-3 py-1 rounded"
-            >
-              Save As
-            </button>
-
-            <button
-              onClick={() => {
-                const savedNames = listSavedDecks();
-                const name = prompt(
-                  `Enter name to load from:\n${savedNames.join("\n")}`
-                );
-                if (name) {
-                  loadDeckByName(name);
-                  setCurrentDeckName(name); // 🔄 set loaded deck name
-                }
-              }}
-              className="bg-teal-600 hover:bg-teal-700 text-white font-semibold px-3 py-1 rounded"
-            >
-              Load
-            </button>
-
-            <button
-              onClick={() => {
-                if (
-                  window.confirm(
-                    "Are you sure you want to clear your entire deck?"
-                  )
-                ) {
-                  setDeck({});
-                  localStorage.removeItem("deckachu_mainDeck");
-                }
-              }}
-              className="bg-red-600 hover:bg-red-700 text-white font-semibold px-3 py-1 rounded"
-            >
-              Clear
-            </button>
-          </div>
         </div>
         <DeckView
           deck={deck}
