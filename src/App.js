@@ -365,112 +365,6 @@ function App() {
             : "bottom-0 z-[30] h-[10vh] sm:h-[20vh] md:h-[20vh]"
         }`}
       >
-        {/* ALWAYS-VISIBLE OPTIONS MENU */}
-        <div className="w-full flex justify-end pr-4 sm:pr-6 relative z-[40] mb-2">
-          <button
-            ref={optionsButtonRef}
-            onClick={() => setShowOptionsMenu((prev) => !prev)}
-            className="relative z-[50] bg-gray-700 hover:bg-gray-600 text-white font-semibold px-4 py-2 rounded"
-          >
-            ⚙ Options
-          </button>
-
-          {showOptionsMenu && (
-            <div
-              className={`absolute z-[9999] border border-gray-700 w-full md:w-64 text-left bg-gray-900 rounded-lg shadow-lg ${
-                dropUp ? "bottom-full mb-2" : "top-full mt-2"
-              }`}
-            >
-              <button
-                onClick={() => {
-                  toggleDeckView();
-                  setShowOptionsMenu(false);
-                }}
-                className="block w-full px-4 py-2 hover:bg-gray-800"
-              >
-                {isDeckExpanded ? "Collapse Deck" : "Expand Deck"}
-              </button>
-              <button
-                onClick={() => {
-                  document.getElementById("deck-file-input").click();
-                  setShowOptionsMenu(false);
-                }}
-                className="block w-full px-4 py-2 hover:bg-gray-800"
-              >
-                Import from File
-              </button>
-              <button
-                onClick={() => {
-                  setShowTextImport(true);
-                  setShowOptionsMenu(false);
-                }}
-                className="block w-full px-4 py-2 hover:bg-gray-800"
-              >
-                Import Text
-              </button>
-              <button
-                onClick={() => {
-                  handleExportDeck();
-                  setShowOptionsMenu(false);
-                }}
-                className="block w-full px-4 py-2 hover:bg-gray-800"
-              >
-                Export Deck
-              </button>
-              <button
-                onClick={() => {
-                  saveDeck();
-                  setShowOptionsMenu(false);
-                }}
-                className="block w-full px-4 py-2 hover:bg-gray-800"
-              >
-                Save
-              </button>
-              <button
-                onClick={() => {
-                  saveDeckAs();
-                  setShowOptionsMenu(false);
-                }}
-                className="block w-full px-4 py-2 hover:bg-gray-800"
-              >
-                Save As
-              </button>
-              <button
-                onClick={() => {
-                  const savedNames = listSavedDecks();
-                  const name = prompt(
-                    `Enter name to load from:\n${savedNames.join("\n")}`
-                  );
-                  if (name) {
-                    loadDeckByName(name);
-                    setCurrentDeckName(name);
-                  }
-                  setShowOptionsMenu(false);
-                }}
-                className="block w-full px-4 py-2 hover:bg-gray-800"
-              >
-                Load
-              </button>
-              <button
-                onClick={() => {
-                  setShowOptionsMenu(false);
-                  if (
-                    window.confirm(
-                      "Are you sure you want to clear your entire deck?"
-                    )
-                  ) {
-                    setDeck({});
-                    localStorage.removeItem("deckachu_mainDeck");
-                  }
-                }}
-                className="block w-full px-4 py-2 text-red-400 hover:bg-gray-800"
-              >
-                Clear Deck
-              </button>
-            </div>
-          )}
-        </div>
-
         {/* BUTTON GROUP */}
         <div className="w-full flex flex-col md:flex-row justify-evenly items-center gap-2 relative">
           {/* Hidden file input */}
@@ -489,6 +383,20 @@ function App() {
           setSearchTerm={setSearchTerm}
           searchCards={searchCards}
           filters={activeFilters}
+          showOptionsMenu={showOptionsMenu}
+          setShowOptionsMenu={setShowOptionsMenu}
+          dropUp={dropUp}
+          toggleDeckView={toggleDeckView}
+          setShowTextImport={setShowTextImport}
+          handleExportDeck={handleExportDeck}
+          saveDeck={saveDeck}
+          saveDeckAs={saveDeckAs}
+          listSavedDecks={listSavedDecks}
+          loadDeckByName={loadDeckByName}
+          setCurrentDeckName={setCurrentDeckName}
+          setDeck={setDeck}
+          optionsButtonRef={optionsButtonRef}
+          deckExpanded={isDeckExpanded}
         />
       </div>
 
