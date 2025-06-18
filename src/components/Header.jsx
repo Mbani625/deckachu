@@ -1,5 +1,6 @@
 import { useState } from "react";
 import { logout } from "../auth";
+import logo from "../assets/Deckachu icon.jpg";
 
 export default function Header({ user, onShowLogin }) {
   const [showMobileMenu, setShowMobileMenu] = useState(false);
@@ -7,7 +8,11 @@ export default function Header({ user, onShowLogin }) {
   return (
     <div className="flex items-center justify-between bg-gray-900 text-white px-3 pb-2 sm:flex-row sm:items-center sm:gap-4">
       {/* Site Title */}
-      <h1 className="text-2xl font-bold tracking-wide">Deckachu</h1>
+
+      <a href="/" className="flex items-center gap-2">
+        <img src={logo} alt="Deckachu Logo" className="h-12 w-12 rounded" />
+        <h1 className="text-2xl font-bold tracking-wide">Deckachu</h1>
+      </a>
 
       {/* DESKTOP BUTTONS */}
       <div className="hidden sm:flex gap-2 items-center">

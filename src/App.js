@@ -10,20 +10,15 @@ import FilterDropdown from "./components/FilterDropdown";
 import { formatDeckForExport } from "./utils/formatDeckForExport";
 import { importDeckFromTxt } from "./utils/importDeckFromTxt";
 import DeckTextImportModal from "./components/DeckTextImportModal";
-//import useScrollHeader from "./hooks/useScrollHeader";
 import { fetchAndCacheSets } from "./utils/setCache";
 import { login, logout, onAuthChange } from "./auth";
 import Header from "./components/Header";
 import LoginModal from "./components/LoginModal";
 import { login as loginWithEmail, register as signupWithEmail } from "./auth";
+import FilterBar from "./components/FilterBar";
 
 function App() {
   const [user, setUser] = useState(null);
-
-  useEffect(() => {
-    const unsubscribe = onAuthChange(setUser);
-    return () => unsubscribe();
-  }, []);
 
   const [deck, setDeck] = useState(() => {
     try {
@@ -57,28 +52,7 @@ function App() {
   const [dropUp, setDropUp] = useState(false);
   const optionsButtonRef = React.useRef(null);
   const [showUserMenu, setShowUserMenu] = useState(false);
-
-  const handleLogin = async (email, password) => {
-    try {
-      await loginWithEmail(email, password);
-      setShowLogin(false);
-    } catch (error) {
-      console.error("Login failed:", error.message);
-    }
-  };
-
-  const handleSignup = async (email, password) => {
-    try {
-      await signupWithEmail(email, password);
-      setShowLogin(false);
-    } catch (error) {
-      console.error("Signup failed:", error.message);
-    }
-  };
-
-  useEffect(() => {
-    fetchAndCacheSets(); // just load it and cache
-  }, []);
+  const [windowWidth, setWindowWidth] = useState(window.innerWidth);
 
   const activeFilters = useMemo(
     () => ({
@@ -176,10 +150,6 @@ function App() {
     return sorted.slice(0, page * 20);
   }, [allResults, sortOption, page]);
 
-  useEffect(() => {
-    localStorage.setItem("deckachu_deck", JSON.stringify(deck));
-  }, [deck]);
-
   const [currentDeckName, setCurrentDeckName] = useState(null);
 
   const saveDeck = () => {
@@ -268,6 +238,19 @@ function App() {
   };
 
   useEffect(() => {
+    const unsubscribe = onAuthChange(setUser);
+    return () => unsubscribe();
+  }, []);
+
+  useEffect(() => {
+    fetchAndCacheSets(); // just load it and cache
+  }, []);
+
+  useEffect(() => {
+    localStorage.setItem("deckachu_deck", JSON.stringify(deck));
+  }, [deck]);
+
+  useEffect(() => {
     if (showOptionsMenu && optionsButtonRef.current) {
       const buttonRect = optionsButtonRef.current.getBoundingClientRect();
       const spaceBelow = window.innerHeight - buttonRect.bottom;
@@ -276,17 +259,18 @@ function App() {
     }
   }, [showOptionsMenu]);
 
+  useEffect(() => {
+    const handleResize = () => setWindowWidth(window.innerWidth);
+    window.addEventListener("resize", handleResize);
+    return () => window.removeEventListener("resize", handleResize);
+  }, []);
+
   // App.js layout wrap
   return (
     <div className="bg-gray-900 text-white min-h-screen">
       {/* Scrollable main content */}
-      {showLogin && (
-        <LoginModal
-          onClose={() => setShowLogin(false)}
-          onLogin={handleLogin}
-          onSignup={handleSignup}
-        />
-      )}
+      {showLogin && <LoginModal onClose={() => setShowLogin(false)} />}
+
       <div className="p-4 pt-[200px]">
         <div className="fixed top-0 left-0 right-0 z-20 bg-gray-900 shadow-md">
           <div className="p-3">
@@ -312,91 +296,34 @@ function App() {
                   >
                     Search
                   </button>
-
-                  {/* Mobile-only filter toggle */}
+                  {/* ⬇️ Collapse/Expand Toggle Here */}
                   <button
                     onClick={() => setShowFilters((prev) => !prev)}
                     className="sm:hidden bg-gray-700 text-white px-3 py-1.5 rounded text-sm hover:bg-gray-600"
                   >
-                    {showFilters ? "▲" : "▼"}
+                    {showFilters ? "▲ Collapse Filters" : "▼ Expand Filters"}
                   </button>
                 </div>
               </div>
-              <div className="hidden sm:block w-px h-8 bg-gray-700 mx-2"></div>{" "}
-              {/* vertical on sm+ */}
-              <div className="block sm:hidden h-px w-full bg-gray-700 my-2"></div>{" "}
+              <div className="block h-px w-full bg-gray-700 my-2"></div>{" "}
               {/* horizontal on mobile */}
               {/* Uniform-width filter dropdowns */}
               <div className="flex flex-wrap items-center gap-2">
-                {showFilters && (
-                  <>
-                    <FilterDropdown
-                      label="Format"
-                      value={format}
-                      onChange={setFormat}
-                      options={["standard", "expanded", "unlimited"]}
-                      className="w-[180px]"
-                    />
-                    <FilterDropdown
-                      label="Card Type"
-                      value={typeFilter}
-                      onChange={setTypeFilter}
-                      options={["Pokémon", "Trainer", "Energy"]}
-                      className="w-[180px]"
-                    />
-                    <FilterDropdown
-                      label="Pokémon Type"
-                      value={pokemonTypeFilter}
-                      onChange={setPokemonTypeFilter}
-                      options={[
-                        "Colorless",
-                        "Darkness",
-                        "Dragon",
-                        "Fairy",
-                        "Fighting",
-                        "Fire",
-                        "Grass",
-                        "Lightning",
-                        "Metal",
-                        "Psychic",
-                        "Water",
-                      ]}
-                      className="w-[180px]"
-                    />
-                    <FilterDropdown
-                      label="Subtype"
-                      value={subtypeFilter}
-                      onChange={setSubtypeFilter}
-                      options={[
-                        "Stage 1",
-                        "Stage 2",
-                        "Basic",
-                        "EX",
-                        "V",
-                        "VSTAR",
-                        "V-UNION",
-                        "BREAK",
-                        "Item",
-                        "Supporter",
-                        "Stadium",
-                        "ACE SPEC",
-                        "Pokémon Tool",
-                        "Special Energy",
-                        "Technical Machine",
-                        "Ancient",
-                        "Fossil",
-                      ]}
-                      className="w-[180px]"
-                    />
-                    <FilterDropdown
-                      label="Sort By"
-                      value={sortOption}
-                      onChange={setSortOption}
-                      options={["A-Z", "Z-A", "Pokémon Type"]}
-                      className="w-[180px]"
-                    />
-                  </>
-                )}
+                <FilterBar
+                  showFilters={showFilters}
+                  setShowFilters={setShowFilters}
+                  windowWidth={windowWidth}
+                  format={format}
+                  setFormat={setFormat}
+                  typeFilter={typeFilter}
+                  setTypeFilter={setTypeFilter}
+                  pokemonTypeFilter={pokemonTypeFilter}
+                  setPokemonTypeFilter={setPokemonTypeFilter}
+                  subtypeFilter={subtypeFilter}
+                  setSubtypeFilter={setSubtypeFilter}
+                  sortOption={sortOption}
+                  setSortOption={setSortOption}
+                />
               </div>
             </div>
           </div>
