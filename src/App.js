@@ -54,6 +54,9 @@ function App() {
   const [rawDeckText, setRawDeckText] = useState("");
   const [showLogin, setShowLogin] = useState(false); // ✅ add this
   const [showFilters, setShowFilters] = useState(true);
+  const [dropUp, setDropUp] = useState(false);
+  const optionsButtonRef = React.useRef(null);
+  const [showUserMenu, setShowUserMenu] = useState(false);
 
   const handleLogin = async (email, password) => {
     try {
@@ -264,6 +267,15 @@ function App() {
     });
   };
 
+  useEffect(() => {
+    if (showOptionsMenu && optionsButtonRef.current) {
+      const buttonRect = optionsButtonRef.current.getBoundingClientRect();
+      const spaceBelow = window.innerHeight - buttonRect.bottom;
+      const dropdownHeight = 300; // estimate height of menu in px
+      setDropUp(spaceBelow < dropdownHeight); // true = pop up
+    }
+  }, [showOptionsMenu]);
+
   // App.js layout wrap
   return (
     <div className="bg-gray-900 text-white min-h-screen">
@@ -287,18 +299,28 @@ function App() {
 
             <div className="flex flex-col sm:flex-row flex-wrap items-stretch sm:items-center gap-2">
               {/* Vertically aligned search section */}
-              <div className="flex flex-col sm:flex-row items-stretch sm:items-center  gap-2 w-full">
-                <SearchBar
-                  searchTerm={searchTerm}
-                  setSearchTerm={setSearchTerm}
-                  onSearchSubmit={handleSearch}
-                />
-                <button
-                  onClick={handleSearch}
-                  className="bg-green-600 hover:bg-green-700 text-white font-semibold px-3 py-1.5 sm:px-4 sm:py-2 text-sm sm:text-base rounded"
-                >
-                  Search
-                </button>
+              <div className="flex flex-col sm:flex-row items-stretch sm:items-center gap-2 w-full">
+                <div className="flex w-full items-stretch gap-2">
+                  <SearchBar
+                    searchTerm={searchTerm}
+                    setSearchTerm={setSearchTerm}
+                    onSearchSubmit={handleSearch}
+                  />
+                  <button
+                    onClick={handleSearch}
+                    className="bg-green-600 hover:bg-green-700 text-white font-semibold px-3 py-1.5 sm:px-4 sm:py-2 text-sm sm:text-base rounded"
+                  >
+                    Search
+                  </button>
+
+                  {/* Mobile-only filter toggle */}
+                  <button
+                    onClick={() => setShowFilters((prev) => !prev)}
+                    className="sm:hidden bg-gray-700 text-white px-3 py-1.5 rounded text-sm hover:bg-gray-600"
+                  >
+                    {showFilters ? "▲" : "▼"}
+                  </button>
+                </div>
               </div>
               <div className="hidden sm:block w-px h-8 bg-gray-700 mx-2"></div>{" "}
               {/* vertical on sm+ */}
@@ -366,29 +388,21 @@ function App() {
                       ]}
                       className="w-[180px]"
                     />
+                    <FilterDropdown
+                      label="Sort By"
+                      value={sortOption}
+                      onChange={setSortOption}
+                      options={["A-Z", "Z-A", "Pokémon Type"]}
+                      className="w-[180px]"
+                    />
                   </>
                 )}
-
-                <FilterDropdown
-                  label="Sort By"
-                  value={sortOption}
-                  onChange={setSortOption}
-                  options={["A-Z", "Z-A", "Pokémon Type"]}
-                  className="w-[180px]"
-                />
-
-                <button
-                  onClick={() => setShowFilters((prev) => !prev)}
-                  className="ml-2 px-3 py-1.5 self-end rounded bg-gray-700 text-white text-sm hover:bg-gray-600"
-                >
-                  {showFilters ? "▲ Collapse" : "▼ Show"}
-                </button>
               </div>
             </div>
           </div>
         </div>
 
-        <div className="flex-grow overflow-y-auto md:mt-[0px] mt-[100px] p-4 pt-0">
+        <div className="flex-grow overflow-visible md:mt-[0px] mt-[100px] p-4 pt-0 relative z-10">
           {isLoading ? (
             <div className="flex flex-col justify-center items-center py-20">
               <div className="animate-spin rounded-full h-12 w-12 border-t-4 border-blue-500 border-4 mb-4"></div>
@@ -419,14 +433,120 @@ function App() {
           </div>
         )}
       </div>
+
       {/* Fixed deck view at bottom */}
       <div
-        className={`fixed left-0 right-0 p-4 bg-gray-950 border-t border-gray-800 transition-all duration-300 overflow-y-auto ${
+        className={`fixed left-0 right-0 p-4 bg-gray-950 border-t border-gray-800 transition-all duration-300 overflow-visible ${
           isDeckExpanded
             ? "top-0 bottom-0 z-[9999]" // Full-screen overlay
-            : "bottom-0 z-[30] h-[25vh] sm:h-[40vh] md:h-[40vh]"
+            : "bottom-0 z-[30] h-[10vh] sm:h-[20vh] md:h-[20vh]"
         }`}
       >
+        {/* MOBILE OPTIONS MENU */}
+        <div className="md:hidden w-full text-center relative z-[9999] mb-2">
+          <button
+            ref={optionsButtonRef}
+            onClick={() => setShowOptionsMenu((prev) => !prev)}
+            className="bg-gray-700 hover:bg-gray-600 text-white font-semibold px-4 py-2 rounded w-full"
+          >
+            ⚙ Options
+          </button>
+          {showOptionsMenu && (
+            <div
+              className={`absolute z-[9999] border border-gray-700 w-full text-left bg-gray-900 rounded-lg shadow-lg ${
+                dropUp ? "bottom-full mb-2" : "top-full mt-2"
+              }`}
+            >
+              <button
+                onClick={() => {
+                  toggleDeckView();
+                  setShowOptionsMenu(false);
+                }}
+                className="block w-full px-4 py-2 hover:bg-gray-800"
+              >
+                {isDeckExpanded ? "Collapse Deck" : "Expand Deck"}
+              </button>
+              <button
+                onClick={() => {
+                  document.getElementById("deck-file-input").click();
+                  setShowOptionsMenu(false);
+                }}
+                className="block w-full px-4 py-2 hover:bg-gray-800"
+              >
+                Import from File
+              </button>
+              <button
+                onClick={() => {
+                  setShowTextImport(true);
+                  setShowOptionsMenu(false);
+                }}
+                className="block w-full px-4 py-2 hover:bg-gray-800"
+              >
+                Import Text
+              </button>
+              <button
+                onClick={() => {
+                  handleExportDeck();
+                  setShowOptionsMenu(false);
+                }}
+                className="block w-full px-4 py-2 hover:bg-gray-800"
+              >
+                Export Deck
+              </button>
+              <button
+                onClick={() => {
+                  saveDeck();
+                  setShowOptionsMenu(false);
+                }}
+                className="block w-full px-4 py-2 hover:bg-gray-800"
+              >
+                Save
+              </button>
+              <button
+                onClick={() => {
+                  saveDeckAs();
+                  setShowOptionsMenu(false);
+                }}
+                className="block w-full px-4 py-2 hover:bg-gray-800"
+              >
+                Save As
+              </button>
+              <button
+                onClick={() => {
+                  const savedNames = listSavedDecks();
+                  const name = prompt(
+                    `Enter name to load from:\n${savedNames.join("\n")}`
+                  );
+                  if (name) {
+                    loadDeckByName(name);
+                    setCurrentDeckName(name);
+                  }
+                  setShowOptionsMenu(false);
+                }}
+                className="block w-full px-4 py-2 hover:bg-gray-800"
+              >
+                Load
+              </button>
+              <button
+                onClick={() => {
+                  setShowOptionsMenu(false);
+                  if (
+                    window.confirm(
+                      "Are you sure you want to clear your entire deck?"
+                    )
+                  ) {
+                    setDeck({});
+                    localStorage.removeItem("deckachu_mainDeck");
+                  }
+                }}
+                className="block w-full px-4 py-2 text-red-400 hover:bg-gray-800"
+              >
+                Clear Deck
+              </button>
+            </div>
+          )}
+        </div>
+
         {/* BUTTON GROUP */}
         <div className="w-full flex flex-col md:flex-row justify-evenly items-center gap-2 relative">
           {/* Hidden file input */}
@@ -514,112 +634,7 @@ function App() {
               Clear
             </button>
           </div>
-
-          {/* MOBILE OPTIONS MENU */}
-          <div className="md:hidden w-full text-center">
-            <button
-              onClick={() => setShowOptionsMenu((prev) => !prev)}
-              className="bg-gray-700 hover:bg-gray-600 text-white font-semibold px-4 py-2 rounded w-full"
-            >
-              ⚙ Options
-            </button>
-            {showOptionsMenu && (
-              <div className="mt-2 bg-gray-900 rounded-lg shadow-lg z-50 border border-gray-700 w-full text-left">
-                <button
-                  onClick={() => {
-                    toggleDeckView();
-                    setShowOptionsMenu(false);
-                  }}
-                  className="block w-full px-4 py-2 hover:bg-gray-800"
-                >
-                  {isDeckExpanded ? "Collapse Deck" : "Expand Deck"}
-                </button>
-                <button
-                  onClick={() => {
-                    document.getElementById("deck-file-input").click();
-                    setShowOptionsMenu(false);
-                  }}
-                  className="block w-full px-4 py-2 hover:bg-gray-800"
-                >
-                  Import from File
-                </button>
-                <button
-                  onClick={() => {
-                    setShowTextImport(true);
-                    setShowOptionsMenu(false);
-                  }}
-                  className="block w-full px-4 py-2 hover:bg-gray-800"
-                >
-                  Import Text
-                </button>
-                <button
-                  onClick={() => {
-                    handleExportDeck();
-                    setShowOptionsMenu(false);
-                  }}
-                  className="block w-full px-4 py-2 hover:bg-gray-800"
-                >
-                  Export Deck
-                </button>
-
-                <button
-                  onClick={() => {
-                    saveDeck();
-                    setShowOptionsMenu(false);
-                  }}
-                  className="block w-full px-4 py-2 hover:bg-gray-800"
-                >
-                  Save
-                </button>
-
-                <button
-                  onClick={() => {
-                    saveDeckAs();
-                    setShowOptionsMenu(false);
-                  }}
-                  className="block w-full px-4 py-2 hover:bg-gray-800"
-                >
-                  Save As
-                </button>
-
-                <button
-                  onClick={() => {
-                    const savedNames = listSavedDecks();
-                    const name = prompt(
-                      `Enter name to load from:\n${savedNames.join("\n")}`
-                    );
-                    if (name) {
-                      loadDeckByName(name);
-                      setCurrentDeckName(name);
-                    }
-                    setShowOptionsMenu(false);
-                  }}
-                  className="block w-full px-4 py-2 hover:bg-gray-800"
-                >
-                  Load
-                </button>
-
-                <button
-                  onClick={() => {
-                    setShowOptionsMenu(false);
-                    if (
-                      window.confirm(
-                        "Are you sure you want to clear your entire deck?"
-                      )
-                    ) {
-                      setDeck({});
-                      localStorage.removeItem("deckachu_mainDeck");
-                    }
-                  }}
-                  className="block w-full px-4 py-2 text-red-400 hover:bg-gray-800"
-                >
-                  Clear Deck
-                </button>
-              </div>
-            )}
-          </div>
         </div>
-
         <DeckView
           deck={deck}
           onAdd={handleAddToDeck}
