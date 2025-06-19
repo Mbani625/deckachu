@@ -13,6 +13,13 @@ import { login, logout, onAuthChange } from "./auth";
 import Header from "./components/Header";
 import LoginModal from "./components/LoginModal";
 import FilterBar from "./components/FilterBar";
+import ProfilePage from "./components/ProfilePage";
+import {
+  saveDeckToFirebase,
+  loadDeckFromFirebase,
+  listUserDecks,
+  importDeckFromText,
+} from "./components/Deckmanager";
 
 function App() {
   const [user, setUser] = useState(null);
@@ -44,11 +51,12 @@ function App() {
   const [showOptionsMenu, setShowOptionsMenu] = useState(false);
   const [showTextImport, setShowTextImport] = useState(false);
   const [rawDeckText, setRawDeckText] = useState("");
-  const [showLogin, setShowLogin] = useState(false); // ✅ add this
+  const [showLogin, setShowLogin] = useState(false);
   const [showFilters, setShowFilters] = useState(true);
   const [dropUp, setDropUp] = useState(false);
   const optionsButtonRef = React.useRef(null);
   const [windowWidth, setWindowWidth] = useState(window.innerWidth);
+  const [showProfile, setShowProfile] = useState(false);
 
   const activeFilters = useMemo(
     () => ({
@@ -71,19 +79,6 @@ function App() {
     const file = event.target.files[0];
     if (!file) return;
     importDeckFromTxt(file, setDeck, false); // `false` = not raw text
-  };
-
-  const handleExportDeck = async () => {
-    const deckArray = Object.values(deck);
-    const formatted = await formatDeckForExport(deckArray); // ✅ await it!
-
-    const blob = new Blob([formatted], { type: "text/plain" });
-    const url = URL.createObjectURL(blob);
-    const a = document.createElement("a");
-    a.href = url;
-    a.download = "deck.txt";
-    a.click();
-    URL.revokeObjectURL(url);
   };
 
   const handleSearch = () => {
@@ -148,49 +143,61 @@ function App() {
 
   const [currentDeckName, setCurrentDeckName] = useState(null);
 
-  const saveDeck = () => {
-    if (!currentDeckName) {
-      const name = prompt("Enter name for your deck:");
-      if (!name) return;
-      setCurrentDeckName(name);
-      saveDeckByName(name);
-    } else {
-      saveDeckByName(currentDeckName);
+  const listSavedDecks = async () => {
+    if (!user) return [];
+    const decks = await listUserDecks(user.uid);
+    return decks.map((d) => d.name || d.id);
+  };
+
+  const handleExportDeck = async () => {
+    try {
+      const text = await formatDeckForExport(deck); // ✅ Full deck object
+      const blob = new Blob([text], { type: "text/plain;charset=utf-8" });
+      const link = document.createElement("a");
+      link.href = URL.createObjectURL(blob);
+      link.download = "deck.txt";
+      link.click();
+    } catch (err) {
+      console.error("Export failed:", err);
+      alert("Deck export failed. Check console for details.");
     }
+  };
+
+  const saveDeck = () => {
+    if (!user) {
+      alert("You must be logged in to save a deck.");
+      return;
+    }
+    if (!currentDeckName) {
+      return saveDeckAs();
+    }
+    saveDeckToFirebase(user.uid, currentDeckName, deck);
   };
 
   const saveDeckAs = () => {
-    const name = prompt("Save deck as:");
-    if (!name) return;
-    setCurrentDeckName(name);
-    saveDeckByName(name);
-  };
-
-  const saveDeckByName = (name) => {
-    const allDecks = JSON.parse(
-      localStorage.getItem("deckachu_savedDecks") || "{}"
-    );
-    allDecks[name] = deck;
-    localStorage.setItem("deckachu_savedDecks", JSON.stringify(allDecks));
-    alert(`Deck '${name}' saved!`);
-  };
-
-  const loadDeckByName = (name) => {
-    const allDecks = JSON.parse(
-      localStorage.getItem("deckachu_savedDecks") || "{}"
-    );
-    if (allDecks[name]) {
-      setDeck(allDecks[name]);
-      alert(`Deck '${name}' loaded!`);
-    } else {
-      alert(`Deck '${name}' not found.`);
+    if (!user) {
+      alert("You must be logged in to save a deck.");
+      return;
+    }
+    const newName = prompt("Enter a new name for this deck:");
+    if (newName) {
+      saveDeckToFirebase(user.uid, newName, deck);
+      setCurrentDeckName(newName);
     }
   };
 
-  const listSavedDecks = () => {
-    return Object.keys(
-      JSON.parse(localStorage.getItem("deckachu_savedDecks") || "{}")
-    );
+  const loadDeckByName = async (name) => {
+    if (!user) {
+      alert("Log in to load a deck.");
+      return;
+    }
+    const deckData = await loadDeckFromFirebase(user.uid, name);
+    if (deckData && deckData.cards) {
+      setDeck(deckData.cards);
+      setCurrentDeckName(name);
+    } else {
+      alert("Failed to load deck or no cards found.");
+    }
   };
 
   const handleAddToDeck = (card) => {
@@ -261,9 +268,43 @@ function App() {
     return () => window.removeEventListener("resize", handleResize);
   }, []);
 
+  useEffect(() => {
+    const handleGoHome = () => setShowProfile(false);
+    window.addEventListener("goHome", handleGoHome);
+    return () => {
+      window.removeEventListener("goHome", handleGoHome);
+    };
+  }, []);
+
+  useEffect(() => {
+    const handleGoHome = () => {
+      const saved = JSON.parse(localStorage.getItem("deckachu_deck"));
+      if (saved && typeof saved === "object" && !Array.isArray(saved)) {
+        setDeck(saved.cards || {});
+        setCurrentDeckName(saved.name || null);
+      }
+      setShowProfile(false); // Close profile page
+    };
+
+    window.addEventListener("goHome", handleGoHome);
+    return () => window.removeEventListener("goHome", handleGoHome);
+  }, []);
+
+  useEffect(() => {
+    const handleShowProfile = () => setShowProfile(true);
+    window.addEventListener("showProfile", handleShowProfile);
+
+    return () => {
+      window.removeEventListener("showProfile", handleShowProfile);
+    };
+  }, []);
+  if (showProfile && user) {
+    return <ProfilePage user={user} onBackHome={() => setShowProfile(false)} />;
+  }
+
   // App.js layout wrap
   return (
-    <div className="bg-gray-900 text-white min-h-screen">
+    <div className="bg-gray-900 text-white min-h-screen px-4 pt-[200px]">
       {/* Scrollable main content */}
       {showLogin && <LoginModal onClose={() => setShowLogin(false)} />}
 
@@ -391,8 +432,8 @@ function App() {
           handleExportDeck={handleExportDeck}
           saveDeck={saveDeck}
           saveDeckAs={saveDeckAs}
-          listSavedDecks={listSavedDecks}
           loadDeckByName={loadDeckByName}
+          listSavedDecks={listSavedDecks}
           setCurrentDeckName={setCurrentDeckName}
           setDeck={setDeck}
           optionsButtonRef={optionsButtonRef}

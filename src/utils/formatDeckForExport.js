@@ -1,35 +1,82 @@
 import { fetchAndCacheSets } from "./setCache";
 
 export async function formatDeckForExport(deck) {
-  if (!Array.isArray(deck)) return "";
+  const setCache = await fetchAndCacheSets();
 
-  const setMap = await fetchAndCacheSets();
+  const ENERGY_SYMBOLS = {
+    D: "Darkness",
+    F: "Fighting",
+    G: "Grass",
+    L: "Lightning",
+    M: "Metal",
+    P: "Psychic",
+    R: "Fire",
+    W: "Water",
+    Y: "Fairy",
+    N: "Dragon",
+    C: "Colorless",
+  };
 
-  const sections = { Pokémon: [], Trainer: [], Energy: [] };
-  let total = 0;
+  const categorized = {
+    Pokémon: [],
+    Trainer: [],
+    Energy: [],
+  };
 
-  for (const { card, count } of deck) {
-    const ptcgoCode = setMap.idToPtcgo[card.set.id] || "?";
-    const line = `${count} ${card.name} ${ptcgoCode} ${card.number}`;
+  for (const cardEntry of Object.values(deck)) {
+    const card = cardEntry.card;
+    const count = cardEntry.count;
 
-    if (card.supertype === "Pokémon") {
-      sections.Pokémon.push(line);
-    } else if (card.supertype === "Trainer") {
-      sections.Trainer.push(line);
-    } else if (card.supertype === "Energy") {
-      sections.Energy.push(line);
+    const supertype = card.supertype || "Trainer";
+    const category =
+      supertype === "Pokémon"
+        ? "Pokémon"
+        : supertype === "Energy"
+        ? "Energy"
+        : "Trainer";
+
+    const rawSetId = card.set?.id || card.setCode || "???";
+    const setCode =
+      setCache.idToPtcgo?.[rawSetId] || card.set?.ptcgoCode || rawSetId;
+
+    let line = `${count} ${card.name} ${setCode} ${card.number}`;
+
+    // Fix Basic Energy formatting
+    if (card.supertype === "Energy" && card.subtypes?.includes("Basic")) {
+      const match = card.name.match(/Basic (\w+) Energy/);
+      if (match) {
+        const typeName = match[1];
+        const symbol = Object.entries(ENERGY_SYMBOLS).find(
+          ([key, value]) => value.toLowerCase() === typeName.toLowerCase()
+        );
+        if (symbol) {
+          line = `${count} Basic {${symbol[0]}} Energy ${setCode} ${card.number}`;
+        }
+      }
     }
 
-    total += count;
+    categorized[category].push(line);
   }
 
-  return (
-    `Pokémon: ${sections.Pokémon.length}\n` +
-    sections.Pokémon.join("\n") +
-    `\n\nTrainer: ${sections.Trainer.length}\n` +
-    sections.Trainer.join("\n") +
-    `\n\nEnergy: ${sections.Energy.length}\n` +
-    sections.Energy.join("\n") +
-    `\n\nTotal Cards: ${total}`
-  );
+  const output = [
+    `Pokémon: ${categorized["Pokémon"].reduce(
+      (acc, line) => acc + parseInt(line.split(" ")[0]),
+      0
+    )}`,
+    ...categorized["Pokémon"],
+    "",
+    `Trainer: ${categorized["Trainer"].reduce(
+      (acc, line) => acc + parseInt(line.split(" ")[0]),
+      0
+    )}`,
+    ...categorized["Trainer"],
+    "",
+    `Energy: ${categorized["Energy"].reduce(
+      (acc, line) => acc + parseInt(line.split(" ")[0]),
+      0
+    )}`,
+    ...categorized["Energy"],
+  ];
+
+  return output.join("\n");
 }

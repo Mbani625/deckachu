@@ -1,6 +1,7 @@
 import React, { useState } from "react";
 import DeckSection from "./DeckSection";
 import CardExpandInfo from "./CardExpandInfo";
+import LoadDeckModal from "./LoadDeckModal";
 
 const DeckView = ({
   deck,
@@ -25,25 +26,41 @@ const DeckView = ({
   deckExpanded,
 }) => {
   const [expandedCard, setExpandedCard] = useState(null);
-
+  const [showLoadModal, setShowLoadModal] = useState(false);
+  const [savedDecks, setSavedDecks] = useState([]);
   const deckArray = Object.values(deck);
   const totalCount = deckArray.reduce((sum, { count }) => sum + count, 0);
 
   const categorizeDeck = () => {
-    const pokemon = [];
-    const trainer = [];
-    const energy = [];
+    const categorized = {
+      Pokémon: [],
+      Trainer: [],
+      Energy: [],
+    };
 
-    deckArray.forEach(({ card, count }) => {
+    deckArray.forEach((entry) => {
+      const card = entry.card || entry;
+      if (!card || typeof card !== "object") return;
+
       const supertype = card.supertype || "";
-      const entry = { card, count };
 
-      if (supertype === "Pokémon") pokemon.push(entry);
-      else if (supertype === "Trainer") trainer.push(entry);
-      else if (supertype === "Energy") energy.push(entry);
+      if (supertype === "Pokémon") {
+        categorized.Pokémon.push({ ...entry, card });
+      } else if (supertype === "Trainer") {
+        categorized.Trainer.push({ ...entry, card });
+      } else if (supertype === "Energy") {
+        categorized.Energy.push({ ...entry, card });
+      } else {
+        // Unknown or missing supertype — fallback if needed
+        console.warn("Card missing supertype:", card.name || "[unknown]");
+      }
     });
 
-    return { pokemon, trainer, energy };
+    return {
+      pokemon: categorized.Pokémon,
+      trainer: categorized.Trainer,
+      energy: categorized.Energy,
+    };
   };
 
   const { pokemon, trainer, energy } = categorizeDeck();
@@ -52,7 +69,7 @@ const DeckView = ({
   const handleClose = () => setExpandedCard(null);
 
   return (
-    <div className="relative">
+    <div className="relative px-4">
       <div className="flex justify-between items-center px-4 pt-2 pb-1">
         <div>
           <h2 className="text-xl font-bold">Your Deck</h2>
@@ -134,20 +151,14 @@ const DeckView = ({
               </button>
               <button
                 onClick={() => {
-                  const savedNames = listSavedDecks();
-                  const name = prompt(
-                    `Enter name to load from:\n${savedNames.join("\n")}`
-                  );
-                  if (name) {
-                    loadDeckByName(name);
-                    setCurrentDeckName(name);
-                  }
+                  setShowLoadModal(true);
                   setShowOptionsMenu(false);
                 }}
                 className="block w-full px-4 py-2 hover:bg-gray-800"
               >
                 Load
               </button>
+
               <button
                 onClick={() => {
                   setShowOptionsMenu(false);
@@ -168,39 +179,53 @@ const DeckView = ({
           )}
         </div>
       </div>
-
-      <DeckSection
-        title="Pokémon"
-        cards={pokemon}
-        onAdd={onAdd}
-        onRemove={onRemove}
-        setSearchTerm={setSearchTerm}
-        onExpand={handleExpand}
-      />
-      <DeckSection
-        title="Trainer"
-        cards={trainer}
-        onAdd={onAdd}
-        onRemove={onRemove}
-        setSearchTerm={setSearchTerm}
-        onExpand={handleExpand}
-      />
-      <DeckSection
-        title="Energy"
-        cards={energy}
-        onAdd={onAdd}
-        onRemove={onRemove}
-        setSearchTerm={setSearchTerm}
-        onExpand={handleExpand}
-      />
-
-      {expandedCard && (
-        <CardExpandInfo
-          card={expandedCard}
-          onClose={handleClose}
+      <div
+        className={`overflow-y-auto pr-2 ${
+          deckExpanded ? "max-h-[80vh]" : "max-h-[40vh]"
+        }`}
+      >
+        <DeckSection
+          title="Pokémon"
+          cards={pokemon}
+          onAdd={onAdd}
+          onRemove={onRemove}
           setSearchTerm={setSearchTerm}
-          searchCards={searchCards}
-          filters={filters}
+          onExpand={handleExpand}
+        />
+        <DeckSection
+          title="Trainer"
+          cards={trainer}
+          onAdd={onAdd}
+          onRemove={onRemove}
+          setSearchTerm={setSearchTerm}
+          onExpand={handleExpand}
+        />
+        <DeckSection
+          title="Energy"
+          cards={energy}
+          onAdd={onAdd}
+          onRemove={onRemove}
+          setSearchTerm={setSearchTerm}
+          onExpand={handleExpand}
+        />
+
+        {expandedCard && (
+          <CardExpandInfo
+            card={expandedCard}
+            onClose={handleClose}
+            setSearchTerm={setSearchTerm}
+            searchCards={searchCards}
+            filters={filters}
+          />
+        )}
+      </div>
+      {showLoadModal && (
+        <LoadDeckModal
+          onSelect={async (deckName) => {
+            await loadDeckByName(deckName);
+            setCurrentDeckName(deckName);
+          }}
+          onClose={() => setShowLoadModal(false)}
         />
       )}
     </div>
