@@ -321,7 +321,7 @@ function App() {
 
       <div>
         <div className="fixed top-0 left-0 right-0 z-20 bg-gray-900 shadow-md">
-          <div className="p-3">
+          <div className="p-3 ">
             <Header
               user={user}
               login={login}
@@ -329,7 +329,7 @@ function App() {
               onShowLogin={() => setShowLogin(true)}
             />
 
-            <div className="flex flex-col sm:flex-row flex-wrap items-stretch sm:items-center gap-2">
+            <div className="flex flex-col sm:flex-row flex-wrap items-stretch sm:items-center gap-2 ">
               {/* Search section */}
               <div className="flex flex-col sm:flex-row items-stretch sm:items-center gap-2 w-full">
                 <div className="flex w-full items-stretch gap-2">
@@ -377,7 +377,7 @@ function App() {
           </div>
         </div>
 
-        <div className="flex-grow overflow-visible p-4 pt-[175px] md:pt-[210px] relative z-10">
+        <div className="flex-grow overflow-visible p-4 pt-[175px] md:pt-[210px] relative z-10 bg-gray-900">
           {isLoading ? (
             <div className="flex flex-col justify-center items-center py-20">
               <div className="animate-spin rounded-full h-12 w-12 border-t-4 border-blue-500 border-4 mb-4"></div>
@@ -398,7 +398,7 @@ function App() {
         </div>
 
         {results.length > 0 && (
-          <div className="text-center mb-[40vh]">
+          <div className="text-center pb-[12vh] sm:pb-[15vh] md:pb-[18vh] lg:pb-[22vh]">
             <button
               onClick={loadMore}
               className="bg-blue-500 hover:bg-blue-600 text-white font-semibold py-2 px-4 rounded"
