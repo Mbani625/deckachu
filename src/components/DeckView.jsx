@@ -76,7 +76,7 @@ const DeckView = ({
   const handleClose = () => setExpandedCard(null);
 
   return (
-    <div className="relative px-2">
+    <div className="relative px-1">
       <div className="flex justify-between items-center pt-2 pb-1 ">
         <div>
           <div className="flex items-center mb-2">
@@ -94,7 +94,7 @@ const DeckView = ({
             <div className="flex flex-col sm:flex-row sm:items-center mx-3 gap-2">
               <button
                 onClick={() => setShowNotesModal(true)}
-                className="text-sm bg-gray-700 hover:bg-gray-600 px- py-1 rounded"
+                className="text-sm bg-gray-700 hover:bg-gray-600 px-2 py-1 rounded"
               >
                 Primer
               </button>
@@ -112,9 +112,9 @@ const DeckView = ({
           <button
             ref={optionsButtonRef}
             onClick={() => setShowOptionsMenu((prev) => !prev)}
-            className="bg-gray-700 hover:bg-gray-600 text-white font-semibold px-1 py-2 rounded"
+            className="bg-gray-700 hover:bg-gray-600 text-white font-semibold px-3 py-2 rounded"
           >
-            ⚙ Deck Options
+            ⚙ Options
           </button>
 
           {showOptionsMenu && (
