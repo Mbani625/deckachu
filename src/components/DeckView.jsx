@@ -79,8 +79,8 @@ const DeckView = ({
     <div className="relative px-4">
       <div className="flex justify-between items-center pt-2 pb-1">
         <div>
-          <div className="flex items-center gap-2 mb-2">
-            <div className="flex flex-col sm:flex-row sm:items-center gap-2 sm:gap-2">
+          <div className="flex items-center mb-2">
+            <div className="flex flex-col sm:flex-row sm:items-center ml-0 gap-2">
               <h2 className="text-xl font-bold">
                 {currentDeckName || "Your Deck"}
               </h2>
@@ -91,10 +91,10 @@ const DeckView = ({
               </p>
             </div>
             {/* Notes button */}
-            <div className="flex flex-col sm:flex-row sm:items-center mx-4 gap-2 sm:gap-2">
+            <div className="flex flex-col sm:flex-row sm:items-center mx-3 gap-2">
               <button
                 onClick={() => setShowNotesModal(true)}
-                className="text-sm bg-gray-700 hover:bg-gray-600 px-2 py-1 rounded"
+                className="text-sm bg-gray-700 hover:bg-gray-600 px- py-1 rounded"
               >
                 Primer
               </button>
@@ -112,7 +112,7 @@ const DeckView = ({
           <button
             ref={optionsButtonRef}
             onClick={() => setShowOptionsMenu((prev) => !prev)}
-            className="bg-gray-700 hover:bg-gray-600 text-white font-semibold px-4 py-2 rounded"
+            className="bg-gray-700 hover:bg-gray-600 text-white font-semibold px-1 py-2 rounded"
           >
             ⚙ Deck Options
           </button>
