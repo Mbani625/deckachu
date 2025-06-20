@@ -18,7 +18,6 @@ import {
   saveDeckToFirebase,
   loadDeckFromFirebase,
   listUserDecks,
-  importDeckFromText,
 } from "./components/Deckmanager";
 
 function App() {
@@ -57,6 +56,8 @@ function App() {
   const optionsButtonRef = React.useRef(null);
   const [windowWidth, setWindowWidth] = useState(window.innerWidth);
   const [showProfile, setShowProfile] = useState(false);
+  const [deckNotes, setDeckNotes] = useState("");
+  const [selectedDeckImage, setSelectedDeckImage] = useState(null);
 
   const activeFilters = useMemo(
     () => ({
@@ -171,7 +172,11 @@ function App() {
     if (!currentDeckName) {
       return saveDeckAs();
     }
-    saveDeckToFirebase(user.uid, currentDeckName, deck);
+    saveDeckToFirebase(user.uid, currentDeckName, {
+      cards: deck,
+      notes: deckNotes,
+      deckImage: selectedDeckImage,
+    });
   };
 
   const saveDeckAs = () => {
@@ -181,7 +186,12 @@ function App() {
     }
     const newName = prompt("Enter a new name for this deck:");
     if (newName) {
-      saveDeckToFirebase(user.uid, newName, deck);
+      saveDeckToFirebase(user.uid, currentDeckName, {
+        cards: deck,
+        notes: deckNotes,
+        deckImage: selectedDeckImage,
+      });
+
       setCurrentDeckName(newName);
     }
   };
@@ -194,6 +204,7 @@ function App() {
     const deckData = await loadDeckFromFirebase(user.uid, name);
     if (deckData && deckData.cards) {
       setDeck(deckData.cards);
+      setDeckNotes(deckData.notes || "");
       setCurrentDeckName(name);
     } else {
       alert("Failed to load deck or no cards found.");
@@ -308,7 +319,7 @@ function App() {
       {/* Scrollable main content */}
       {showLogin && <LoginModal onClose={() => setShowLogin(false)} />}
 
-      <div className="p-4 pt-[200px]">
+      <div>
         <div className="fixed top-0 left-0 right-0 z-20 bg-gray-900 shadow-md">
           <div className="p-3">
             <Header
@@ -438,6 +449,10 @@ function App() {
           setDeck={setDeck}
           optionsButtonRef={optionsButtonRef}
           deckExpanded={isDeckExpanded}
+          currentDeckName={currentDeckName}
+          deckNotes={deckNotes}
+          setDeckNotes={setDeckNotes}
+          setSelectedDeckImage={setSelectedDeckImage}
         />
       </div>
 

@@ -75,24 +75,44 @@ export default function ProfilePage() {
             <p className="text-gray-400">No decks saved yet.</p>
           ) : (
             <ul className="space-y-2">
-              {decks.map((deck) => (
-                <li key={deck.id} className="bg-gray-800 p-4 rounded">
-                  <div className="flex justify-between items-center">
-                    <span
-                      className="text-blue-400 hover:underline cursor-pointer"
-                      onClick={() => handleLoad(deck.name)}
-                    >
+              <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 gap-4">
+                {decks.map((deck) => (
+                  <div
+                    key={deck.name}
+                    className="bg-gray-800 p-3 rounded-lg flex flex-col items-center shadow hover:shadow-lg transition-shadow"
+                  >
+                    {deck.deckImage ? (
+                      <button
+                        onClick={() => handleLoad(deck.name)}
+                        className="mb-2"
+                      >
+                        <img
+                          src={deck.deckImage.image}
+                          alt={deck.deckImage.name}
+                          className="h-40 w-auto rounded hover:scale-105 transition-transform"
+                        />
+                      </button>
+                    ) : (
+                      <button
+                        onClick={() => handleLoad(deck.name)}
+                        className="h-40 w-28 bg-gray-700 rounded mb-2"
+                        title="Open deck"
+                      />
+                    )}
+
+                    <p className="text-white text-sm font-semibold mb-1">
                       {deck.name}
-                    </span>
+                    </p>
+
                     <button
-                      className="bg-red-600 px-2 py-1 rounded text-sm"
-                      onClick={() => handleDelete(deck.name)}
+                      onClick={() => handleDelete(deck.id)}
+                      className="bg-red-600 hover:bg-red-700 text-white px-3 py-1 rounded flex items-center gap-2"
                     >
                       Delete
                     </button>
                   </div>
-                </li>
-              ))}
+                ))}
+              </div>
             </ul>
           )}
         </div>

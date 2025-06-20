@@ -16,8 +16,11 @@ export const saveDeckToFirebase = async (uid, deckName, deckData) => {
     await setDoc(deckRef, {
       name: deckName,
       createdAt: serverTimestamp(),
-      cards: deckData,
+      cards: deckData.cards,
+      notes: deckData.notes || "",
+      deckImage: deckData.deckImage || null,
     });
+
     alert(`Deck '${deckName}' saved to Firebase!`);
   } catch (error) {
     console.error("Error saving deck:", error);

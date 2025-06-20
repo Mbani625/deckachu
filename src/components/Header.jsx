@@ -1,6 +1,6 @@
 import { useState } from "react";
 import { logout } from "../auth";
-import logo from "../assets/Deckachu icon.jpg";
+const logo = process.env.PUBLIC_URL + "/deckachu-icon.jpg";
 
 export default function Header({ user, onShowLogin }) {
   const [showMobileMenu, setShowMobileMenu] = useState(false);

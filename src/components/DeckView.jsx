@@ -2,6 +2,8 @@ import React, { useState } from "react";
 import DeckSection from "./DeckSection";
 import CardExpandInfo from "./CardExpandInfo";
 import LoadDeckModal from "./LoadDeckModal";
+import DeckNotesModal from "./DeckNotesModal";
+import DeckImageSelectionModal from "./DeckImageSelectionModal";
 
 const DeckView = ({
   deck,
@@ -24,12 +26,17 @@ const DeckView = ({
   setDeck,
   optionsButtonRef,
   deckExpanded,
+  currentDeckName,
+  deckNotes,
+  setDeckNotes,
+  setSelectedDeckImage,
 }) => {
   const [expandedCard, setExpandedCard] = useState(null);
   const [showLoadModal, setShowLoadModal] = useState(false);
-  const [savedDecks, setSavedDecks] = useState([]);
   const deckArray = Object.values(deck);
   const totalCount = deckArray.reduce((sum, { count }) => sum + count, 0);
+  const [showNotesModal, setShowNotesModal] = useState(false);
+  const [showDeckImageModal, setShowDeckImageModal] = useState(false);
 
   const categorizeDeck = () => {
     const categorized = {
@@ -70,16 +77,38 @@ const DeckView = ({
 
   return (
     <div className="relative px-4">
-      <div className="flex justify-between items-center px-4 pt-2 pb-1">
+      <div className="flex justify-between items-center pt-2 pb-1">
         <div>
-          <h2 className="text-xl font-bold">Your Deck</h2>
-          <p className="text-sm text-gray-400">
-            Total Cards:{" "}
-            <span className="text-white font-semibold">{totalCount}</span> / 60
-          </p>
+          <div className="flex items-center gap-2 mb-2">
+            <div className="flex flex-col sm:flex-row sm:items-center gap-2 sm:gap-2">
+              <h2 className="text-xl font-bold">
+                {currentDeckName || "Your Deck"}
+              </h2>
+              <p className="text-sm text-gray-400">
+                Total Cards:{" "}
+                <span className="text-white font-semibold">{totalCount}</span> /
+                60
+              </p>
+            </div>
+            {/* Notes button */}
+            <div className="flex flex-col sm:flex-row sm:items-center mx-4 gap-2 sm:gap-2">
+              <button
+                onClick={() => setShowNotesModal(true)}
+                className="text-sm bg-gray-700 hover:bg-gray-600 px-2 py-1 rounded"
+              >
+                Primer
+              </button>
+              <button
+                onClick={() => setShowDeckImageModal(true)}
+                className="text-sm bg-gray-700 hover:bg-gray-600 px-2 py-1 rounded"
+              >
+                Deck Image
+              </button>
+            </div>
+          </div>
         </div>
 
-        <div className="relative inline-block text-right z-50">
+        <div className="relative flex-row text-right z-50">
           <button
             ref={optionsButtonRef}
             onClick={() => setShowOptionsMenu((prev) => !prev)}
@@ -133,13 +162,22 @@ const DeckView = ({
               </button>
               <button
                 onClick={() => {
-                  saveDeck();
                   setShowOptionsMenu(false);
+                  if (
+                    window.confirm(
+                      `Are you sure you want to save the changes to "${
+                        currentDeckName || "this deck"
+                      }"?`
+                    )
+                  ) {
+                    saveDeck();
+                  }
                 }}
                 className="block w-full px-4 py-2 hover:bg-gray-800"
               >
                 Save
               </button>
+
               <button
                 onClick={() => {
                   saveDeckAs();
@@ -226,6 +264,25 @@ const DeckView = ({
             setCurrentDeckName(deckName);
           }}
           onClose={() => setShowLoadModal(false)}
+        />
+      )}
+      {showNotesModal && (
+        <DeckNotesModal
+          initialNotes={deckNotes}
+          onSave={(newNotes) => {
+            setDeckNotes(newNotes); // from props, passed from App.js
+          }}
+          onClose={() => setShowNotesModal(false)}
+        />
+      )}
+      {showDeckImageModal && (
+        <DeckImageSelectionModal
+          deck={deck}
+          onSelect={(imageData) => {
+            setSelectedDeckImage(imageData);
+            setShowDeckImageModal(false);
+          }}
+          onClose={() => setShowDeckImageModal(false)}
         />
       )}
     </div>
