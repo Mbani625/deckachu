@@ -399,12 +399,21 @@ function App() {
 
         {results.length > 0 && (
           <div className="text-center pb-[12vh] sm:pb-[15vh] md:pb-[18vh] lg:pb-[22vh]">
-            <button
-              onClick={loadMore}
-              className="bg-blue-500 hover:bg-blue-600 text-white font-semibold py-2 px-4 rounded"
-            >
-              Load More
-            </button>
+            {results.length >= 20 && page < 10 ? (
+              <button
+                onClick={loadMore}
+                className="bg-blue-500 hover:bg-blue-600 text-white font-semibold py-2 px-4 rounded"
+              >
+                Load More
+              </button>
+            ) : (
+              <button
+                disabled
+                className="bg-gray-400 text-white font-semibold py-2 px-4 rounded cursor-not-allowed"
+              >
+                No more cards
+              </button>
+            )}
           </div>
         )}
       </div>

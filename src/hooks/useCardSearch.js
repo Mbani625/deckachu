@@ -22,7 +22,6 @@ const useCardSearch = () => {
         lowerQuery.includes("basic")) &&
       (filters.cardType === "Energy" || filters.cardType === "All");
 
-    // Base filter: only by format/cardType/subtype/type
     if (filters.format === "standard" && !isBasicEnergySearch) {
       q.push(
         '(regulationMark:"G" OR regulationMark:"H" OR regulationMark:"I" OR regulationMark:"J")'
@@ -77,6 +76,12 @@ const useCardSearch = () => {
 
       await fetchAndCacheSets();
 
+      if (rawCards.length > 200) {
+        alert(
+          "Too many cards returned. We are showing the first 200 on the list but to see more, try adding more filters to narrow your search."
+        );
+      }
+
       const mappedCards = await Promise.all(
         rawCards.map(async (card) => {
           const ptcgoCode = getCachedSet(card.set?.id) || "?";
@@ -104,7 +109,6 @@ const useCardSearch = () => {
         })
       );
 
-      // ✅ Apply search term matching on all fields here
       const filteredCards = filterCardsBySearchTerm(mappedCards, searchTerm);
       applySortAndPaginate(filteredCards, filters, 1);
     } catch (err) {
