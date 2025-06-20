@@ -315,7 +315,7 @@ function App() {
 
   // App.js layout wrap
   return (
-    <div className="bg-gray-900 text-white min-h-screen px-4 pt-[200px]">
+    <div className="bg-gray-900 text-white min-h-screen px-4 pt-[50px]">
       {/* Scrollable main content */}
       {showLogin && <LoginModal onClose={() => setShowLogin(false)} />}
 
