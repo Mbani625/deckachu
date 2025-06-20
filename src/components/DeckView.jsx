@@ -76,8 +76,8 @@ const DeckView = ({
   const handleClose = () => setExpandedCard(null);
 
   return (
-    <div className="relative px-4">
-      <div className="flex justify-between items-center pt-2 pb-1">
+    <div className="relative px-2">
+      <div className="flex justify-between items-center pt-2 pb-1 ">
         <div>
           <div className="flex items-center mb-2">
             <div className="flex flex-col sm:flex-row sm:items-center ml-0 gap-2">
