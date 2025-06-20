@@ -315,7 +315,7 @@ function App() {
 
   // App.js layout wrap
   return (
-    <div className="bg-gray-900 text-white min-h-screen px-4 pt-[50px]">
+    <div className="bg-gray-900 text-white min-h-screen px-4 ">
       {/* Scrollable main content */}
       {showLogin && <LoginModal onClose={() => setShowLogin(false)} />}
 
@@ -377,7 +377,7 @@ function App() {
           </div>
         </div>
 
-        <div className="flex-grow overflow-visible md:mt-[0px] mt-[100px] p-4 pt-0 relative z-10">
+        <div className="flex-grow overflow-visible p-4 pt-[175px] md:pt-[210px] relative z-10">
           {isLoading ? (
             <div className="flex flex-col justify-center items-center py-20">
               <div className="animate-spin rounded-full h-12 w-12 border-t-4 border-blue-500 border-4 mb-4"></div>
